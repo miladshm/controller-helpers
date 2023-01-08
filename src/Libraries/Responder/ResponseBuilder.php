@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Libraries\Responder;
+namespace Miladshm\ControllerHelpers\Libraries\Responder;
 
 use ArrayAccess;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Response;
 
 class ResponseBuilder
 {
@@ -79,8 +78,8 @@ class ResponseBuilder
             $response['data'] = $this->data;
         }
 
-        return response()
-            ->json($response, $this->http_code ?? 200);
+
+        return Response::json($response, $this->http_code ?? 200);
     }
 
     /**
