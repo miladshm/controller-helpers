@@ -2,6 +2,7 @@
 
 namespace App\Libraries\Responder;
 
+use ArrayAccess;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
@@ -12,7 +13,7 @@ class ResponseBuilder
     private ?string $exception_message = null;
     private ?int $http_code = null;
     private int $code = 0;
-    private iterable $data = [];
+    private ArrayAccess $data;
 
     /**
      * @param string $message
@@ -35,10 +36,10 @@ class ResponseBuilder
     }
 
     /**
-     * @param iterable $data
+     * @param ArrayAccess $data
      * @return ResponseBuilder
      */
-    public function setData(iterable $data): ResponseBuilder
+    public function setData(ArrayAccess $data): ResponseBuilder
     {
         $this->data = $data;
         return $this;
@@ -61,9 +62,9 @@ class ResponseBuilder
     }
 
     /**
-     * @return iterable
+     * @return ArrayAccess
      */
-    public function getData(): iterable
+    public function getData(): ArrayAccess
     {
         return $this->data;
     }
@@ -71,11 +72,11 @@ class ResponseBuilder
     public function respond(): JsonResponse
     {
         $response = [
-            'Status' => $this->code,
-            'Message' => $this->message ?? trans('messages.success_status.status')
+            'status' => $this->code,
+            'message' => $this->message ?? trans('messages.success_status.status')
         ];
         if (isset($this->data)) {
-            $response['Data'] = $this->data;
+            $response['data'] = $this->data;
         }
 
         return response()
