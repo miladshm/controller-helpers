@@ -13,46 +13,44 @@ use Illuminate\View\View;
 trait HasApiDatatable
 {
     use HasIndex;
+
     private function indexView(): View
     {
 
     }
 
-
     /**
      * Display a listing of the resource.
      *
-     * @param ApiListRequest $request
+     * @param ListRequest $request
      * @param DatatableBuilder $datatable
      * @return JsonResponse
      */
-    public function index(ApiListRequest $request, DatatableBuilder $datatable): JsonResponse
+    public function index(ListRequest $request, DatatableBuilder $datatable): JsonResponse
     {
         $items = $datatable->setBuilder($this->getItems())
             ->setSearchable($this->setSearchable())
             ->setPageLength($this->setPageLength())
-            ->setFields($this->setFields())
             ->grid($request);
-        $filters = $request->only('q','searchable','sort','page','pageLength');
-        $data = compact('items','filters') + $this->extraData();
+        $filters = $request->query();
+        $data = compact('items', 'filters') + $this->extraData();
 
         return ResponderFacade::setData($data)->respond();
-    }
-
-
-
-    protected function setSearchable(): ?array
-    {
-        return null;
     }
 
     protected function setPageLength(): ?int
     {
         return null;
     }
-    protected function setFields(): ?array
+
+    protected function setSearchable(): ?array
     {
-        return ['*'];
+        return null;
+    }
+
+    private function indexView(): View
+    {
+
     }
 }
 
