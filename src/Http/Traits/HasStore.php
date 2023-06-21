@@ -2,8 +2,8 @@
 
 namespace App\Http\Traits;
 
-use App\Exceptions\ApiValidationException;
-use App\Libraries\Responder\Facades\ResponderFacade;
+use Miladshm\ControllerHelpers\Exceptions\ApiValidationException;
+use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
