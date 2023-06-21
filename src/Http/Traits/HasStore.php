@@ -1,9 +1,9 @@
 <?php
 
-namespace Miladshm\ControllerHelpers\Http\Traits;
+namespace App\Http\Traits;
 
-use Miladshm\ControllerHelpers\Exceptions\ApiValidationException;
-use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
+use App\Exceptions\ApiValidationException;
+use App\Libraries\Responder\Facades\ResponderFacade;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
@@ -27,9 +27,9 @@ trait HasStore
      */
     public function store(Request $request): RedirectResponse|JsonResponse
     {
-        $data = Validator::make($request->all(),$this->requestClass()->rules(),$this->requestClass()->messages())
-            ->setException(ApiValidationException::class)
+        $data = Validator::make($request->all(), $this->requestClass()->rules(), $this->requestClass()->messages())
             ->validate();
+        $this->requestClass()->passedValidation();
         DB::beginTransaction();
         try {
             $item = $this->model()->query()->create($data);
@@ -37,7 +37,7 @@ trait HasStore
 
         } catch (\Exception $exception) {
             DB::rollBack();
-            return ResponderFacade::setMessage($exception->getMessage())->respondError();
+            return ResponderFacade::setExceptionMessage($exception->getMessage())->respondError();
         }
         DB::commit();
         if ($request->expectsJson())
