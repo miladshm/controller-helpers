@@ -42,7 +42,13 @@ class DatatableBuilder
     {
         $this->builder = $model?->newQuery() ?? $this->builder;
         $this->request = $request;
-        return $this->search()->sortResult()->paginate($request->pageLength ?? $this->pageLength);
+        $results = $this->search()->sortResult();
+
+        if ($request->boolean('all'))
+            return $results->builder->get();
+        else
+            return $results->paginate($request->pageLength ?? $this->pageLength)
+                ->withQueryString();
     }
 
 

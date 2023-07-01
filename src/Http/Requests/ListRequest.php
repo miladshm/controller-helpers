@@ -34,6 +34,7 @@ class ListRequest extends FormRequest
             'sort.dir' => ['nullable', Rule::in(['asc','desc'])],
             'page' => ['nullable', 'integer'],
             'pageLength' => ['nullable', 'integer'],
+            'all' => ['boolean']
         ];
     }
 }
