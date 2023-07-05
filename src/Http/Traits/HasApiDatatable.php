@@ -3,7 +3,7 @@
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
 use Miladshm\ControllerHelpers\Helpers\DatatableBuilder;
-use Miladshm\ControllerHelpers\Http\Requests\ApiListRequest;
+use Miladshm\ControllerHelpers\Http\Requests\ListRequest;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
