@@ -14,11 +14,6 @@ trait HasApiDatatable
 {
     use HasIndex;
 
-    private function indexView(): View
-    {
-
-    }
-
     /**
      * Display a listing of the resource.
      *
