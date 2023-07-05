@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Traits;
+namespace Miladshm\ControllerHelpers\Http\Traits;
 
 use Miladshm\ControllerHelpers\Exceptions\ApiValidationException;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
