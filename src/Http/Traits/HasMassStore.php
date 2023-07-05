@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Traits;
+namespace Miladshm\ControllerHelpers\Http\Traits;
 
-use App\Libraries\Responder\Facades\ResponderFacade;
+use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
