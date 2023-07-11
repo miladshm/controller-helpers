@@ -2,21 +2,25 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Response;
+use Miladshm\ControllerHelpers\Traits\HasModel;
 
 trait HasChangeStatus
 {
-    abstract private function model(): Model;
+    use HasModel;
 
-    public function changeStatus(int $id)
+    public function changeStatus(int $id, string $statusColumn = 'status')
     {
         $item = $this->model()->query()->findOrFail($id);
-        $item->status = !$item->status;
+        $item->{$statusColumn} = !$item->{$statusColumn};
         $item->save();
 
-        if (\request()->expectsJson())
-            return response()->json(trans('messages.success_change_status') );
-        return redirect()->back()->with(trans('messages.success_change_status'));
+        if (Request::expectsJson())
+            return Response::json(Lang::get('responder::messages.success_change_status'));
+        return Redirect::back()->with(Lang::get('responder::messages.success_change_status'));
     }
 
 }

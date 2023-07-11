@@ -2,16 +2,19 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
-use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Request;
+use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 
 trait HasDestroy
 {
-    abstract private function model():Model;
+    abstract private function model(): Model;
 
 
     /**
@@ -21,19 +24,19 @@ trait HasDestroy
      */
     public function destroy($id): JsonResponse|RedirectResponse
     {
-            $item = $this->model()->query()
-                ->when(in_array(SoftDeletes::class,class_uses($this->model()) ?? []), function (Builder $q){
-                    $q->withTrashed();
-                })
-                ->findOrFail($id);
+        $item = $this->model()->query()
+            ->when(in_array(SoftDeletes::class, class_uses($this->model()) ?? []), function (Builder $q) {
+                $q->withTrashed();
+            })
+            ->findOrFail($id);
 
-            if ($item->deleted_at)
-                $item->forceDelete();
-            else
-                $item->deleteOrFail();
+        if ($item->deleted_at)
+            $item->forceDelete();
+        else
+            $item->deleteOrFail();
 
-        if (request()->expectsJson())
-            return ResponderFacade::setMessage(trans('messages.success_delete.status'))->respond();
-        return back()->with(trans('messages.success_delete'));
+        if (Request::expectsJson())
+            return ResponderFacade::setMessage(Lang::get('responder::messages.success_delete.status'))->respond();
+        return Redirect::back()->with(Lang::get('responder::messages.success_delete'));
     }
 }

@@ -4,6 +4,7 @@ namespace Miladshm\ControllerHelpers\Libraries\Responder;
 
 use ArrayAccess;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Response;
 
 class ResponseBuilder
@@ -72,7 +73,7 @@ class ResponseBuilder
     {
         $response = [
             'status' => $this->code,
-            'message' => $this->message ?? trans('messages.success_status.status')
+            'message' => $this->message ?? Lang::get('responder::messages.success_status.status')
         ];
         if (isset($this->data)) {
             $response['data'] = $this->data;
@@ -94,35 +95,35 @@ class ResponseBuilder
 
     public function respondNotFound(): JsonResponse
     {
-        return $this->setMessage($this->message ?? trans('messages.not_found_status.status'))
+        return $this->setMessage($this->message ?? Lang::get('responder::messages.not_found_status.status'))
             ->setHttpCode($this->http_code ?? 404)
             ->respond();
     }
 
     public function respondNoAccess(): JsonResponse
     {
-        return $this->setMessage($this->message ?? trans('messages.no_access_status.status'))
+        return $this->setMessage($this->message ?? Lang::get('responder::messages.no_access_status.status'))
             ->setHttpCode($this->http_code ?? 403)
             ->respond();
     }
 
     public function respondUnavailable(): JsonResponse
     {
-        return $this->setMessage($this->message ?? trans('messages.service_unavailable.status'))
+        return $this->setMessage($this->message ?? Lang::get('responder::messages.service_unavailable.status'))
             ->setHttpCode($this->http_code ?? 499)
             ->respond();
     }
 
     public function respondInvalid(): JsonResponse
     {
-        return $this->setMessage($this->message ?? trans('messages.invalid_input.status'))
+        return $this->setMessage($this->message ?? Lang::get('responder::messages.invalid_input.status'))
             ->setHttpCode($this->http_code ?? 422)
             ->respond();
     }
 
     public function respondError(): JsonResponse
     {
-        $this->message = $this->message ?? (env('APP_DEBUG') ? $this->exception_message : trans('messages.error_status.status'));
+        $this->message = $this->message ?? (env('APP_DEBUG') ? $this->exception_message : Lang::get('responder::messages.error_status.status'));
         return $this->setMessage($this->message)
             ->setHttpCode($this->http_code ?? 500)
             ->respond();

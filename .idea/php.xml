@@ -2,31 +2,12 @@
 <project version="4">
   <component name="PhpIncludePathManager">
     <include_path>
-      <path value="$PROJECT_DIR$/vendor/symfony/string" />
       <path value="$PROJECT_DIR$/vendor/myclabs/deep-copy" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/bus" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/conditionable" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/collections" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/contracts" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/container" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/events" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/database" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/http" />
       <path value="$PROJECT_DIR$/vendor/composer" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/filesystem" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/pipeline" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/macroable" />
       <path value="$PROJECT_DIR$/vendor/egulias/email-validator" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/session" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/routing" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/translation" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/support" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/view" />
-      <path value="$PROJECT_DIR$/vendor/illuminate/validation" />
       <path value="$PROJECT_DIR$/vendor/nikic/php-parser" />
       <path value="$PROJECT_DIR$/vendor/fruitcake/php-cors" />
       <path value="$PROJECT_DIR$/vendor/doctrine/inflector" />
-      <path value="$PROJECT_DIR$/vendor/doctrine/deprecations" />
       <path value="$PROJECT_DIR$/vendor/doctrine/lexer" />
       <path value="$PROJECT_DIR$/vendor/doctrine/instantiator" />
       <path value="$PROJECT_DIR$/vendor/psr/container" />
@@ -53,8 +34,6 @@
       <path value="$PROJECT_DIR$/vendor/phar-io/manifest" />
       <path value="$PROJECT_DIR$/vendor/sebastian/resource-operations" />
       <path value="$PROJECT_DIR$/vendor/sebastian/version" />
-      <path value="$PROJECT_DIR$/vendor/symfony/console" />
-      <path value="$PROJECT_DIR$/vendor/symfony/service-contracts" />
       <path value="$PROJECT_DIR$/vendor/symfony/deprecation-contracts" />
       <path value="$PROJECT_DIR$/vendor/symfony/var-dumper" />
       <path value="$PROJECT_DIR$/vendor/symfony/mime" />
@@ -77,10 +56,30 @@
       <path value="$PROJECT_DIR$/vendor/symfony/event-dispatcher" />
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-mbstring" />
       <path value="$PROJECT_DIR$/vendor/symfony/translation" />
-      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-intl-grapheme" />
       <path value="$PROJECT_DIR$/vendor/symfony/event-dispatcher-contracts" />
       <path value="$PROJECT_DIR$/vendor/symfony/translation-contracts" />
       <path value="$PROJECT_DIR$/vendor/symfony/http-foundation" />
+      <path value="$PROJECT_DIR$/vendor/brick/math" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php83" />
+      <path value="$PROJECT_DIR$/vendor/guzzlehttp/uri-template" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/bus" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/contracts" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/container" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/conditionable" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/collections" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/http" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/filesystem" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/events" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/database" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/routing" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/pipeline" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/pagination" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/macroable" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/validation" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/translation" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/support" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/session" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/view" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.0">

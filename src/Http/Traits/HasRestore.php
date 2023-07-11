@@ -3,6 +3,10 @@
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Request;
+use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 
 trait HasRestore
 {
@@ -14,7 +18,9 @@ trait HasRestore
 
         $item->restore();
 
-        return response()->json(trans('messages.success_restore'));
+        if (Request::expectsJson())
+            return ResponderFacade::setMessage(Lang::get('responder::messages.success_restore.status'))->respond();
+        return Redirect::back()->with(Lang::get('responder::messages.success_restore'));
 
     }
 

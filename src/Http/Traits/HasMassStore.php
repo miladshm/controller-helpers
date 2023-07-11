@@ -2,13 +2,14 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
-use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\ValidationException;
+use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 
 trait HasMassStore
 {
@@ -45,8 +46,8 @@ trait HasMassStore
         }
         DB::commit();
         if ($request->expectsJson())
-            return ResponderFacade::setData($items->toArray())->setMessage(trans('messages.success_store.status'))->respond();
-        return redirect()->back()->with(trans('messages.success_status'));
+            return ResponderFacade::setData($items->toArray())->setMessage(Lang::get('responder::messages.success_store.status'))->respond();
+        return Redirect::back()->with(Lang::get('responder::messages.success_status'));
     }
 
 

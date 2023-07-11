@@ -18,8 +18,6 @@ trait HasViewShow
     public function show($id): View|JsonResponse
     {
         $item = $this->getModel($id);
-        if (request()->expectsJson())
-            return \response()->json(compact('item'));
         return $this->showView()->with(compact('item'));
     }
 }

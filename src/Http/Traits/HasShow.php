@@ -3,13 +3,12 @@
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
-use Illuminate\Database\Eloquent\Model;
+use Miladshm\ControllerHelpers\Traits\HasModel;
+use Miladshm\ControllerHelpers\Traits\HasRelations;
 
 trait HasShow
 {
-    abstract private function model(): Model;
-
-    abstract private function relations(): array;
+    use HasModel, HasRelations;
 
 
     public function show($id)

@@ -2,21 +2,23 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
-use Miladshm\ControllerHelpers\Exceptions\ApiValidationException;
-use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
+use Miladshm\ControllerHelpers\Traits\HasModel;
 
 trait HasStore
 {
+    use HasModel;
 
-    abstract private function model(): Model;
     abstract private function requestClass(): FormRequest;
 
 
@@ -33,7 +35,7 @@ trait HasStore
         DB::beginTransaction();
         try {
             $item = $this->model()->query()->create($data);
-            $this->storeCallback($request,$item);
+            $this->storeCallback($request, $item);
 
         } catch (\Exception $exception) {
             DB::rollBack();
@@ -41,8 +43,8 @@ trait HasStore
         }
         DB::commit();
         if ($request->expectsJson())
-            return ResponderFacade::setData($item->toArray())->setMessage(trans('messages.success_store.status'))->respond();
-        return redirect()->back()->with(trans('messages.success_status'));
+            return ResponderFacade::setData($item->toArray())->setMessage(Lang::get('responder::messages.success_store.status'))->respond();
+        return Redirect::back()->with(Lang::get('responder::messages.success_status'));
     }
 
 

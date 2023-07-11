@@ -2,9 +2,9 @@
 
 namespace Miladshm\ControllerHelpers\Libraries\Responder\Facades;
 
-use App\Libraries\Responder\ResponseBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Facade;
+use Miladshm\ControllerHelpers\Libraries\Responder\ResponseBuilder;
 
 /**
  * @method static JsonResponse respond()

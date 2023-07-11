@@ -2,8 +2,8 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
+use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 
 trait HasModalShow
 {
@@ -12,6 +12,7 @@ trait HasModalShow
     /**
      * @param $id
      * @return JsonResponse
+     * @throws \Throwable
      */
     public function show($id): JsonResponse
     {
@@ -19,6 +20,6 @@ trait HasModalShow
 
         $html = $this->showView()->with(compact('item'))->render();
 
-        return response()->json(compact('html'));
+        return ResponderFacade::setData(compact('html'))->respond();
     }
 }

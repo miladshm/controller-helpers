@@ -2,17 +2,20 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Request;
 use Miladshm\ControllerHelpers\Helpers\DatatableBuilder;
 use Miladshm\ControllerHelpers\Http\Requests\ListRequest;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\JsonResponse;
-use Illuminate\View\View;
+use Miladshm\ControllerHelpers\Traits\HasExtraData;
+use Miladshm\ControllerHelpers\Traits\HasFilters;
+use Miladshm\ControllerHelpers\Traits\HasModel;
+use Miladshm\ControllerHelpers\Traits\HasRelations;
 
 trait HasApiDatatable
 {
-    use HasIndex;
+    use HasExtraData, HasRelations, HasModel, HasFilters;
 
     /**
      * Display a listing of the resource.
@@ -27,7 +30,7 @@ trait HasApiDatatable
             ->setSearchable($this->setSearchable())
             ->setPageLength($this->setPageLength())
             ->grid($request);
-        $filters = $request->query();
+        $filters = Request::query();
         $data = compact('items', 'filters') + $this->extraData();
 
         return ResponderFacade::setData($data)->respond();
@@ -43,9 +46,21 @@ trait HasApiDatatable
         return null;
     }
 
-    private function indexView(): View
+    private function getItems(): Builder
     {
+        return $this->model()->query()
+            ->select($this->setColumns())
+            ->when(count($this->relations()), function ($q) {
+                $q->with($this->relations());
+            })
+            ->when(true, function (Builder $builder) {
+                return $this->filters($builder);
+            });
+    }
 
+    protected function setColumns(): array
+    {
+        return ['*'];
     }
 }
 
