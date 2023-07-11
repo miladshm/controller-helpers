@@ -10,17 +10,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Miladshm\ControllerHelpers\Traits\HasModel;
+use Miladshm\ControllerHelpers\Traits\HasValidation;
 
 trait HasStore
 {
-    use HasModel;
-
-    abstract private function requestClass(): FormRequest;
-
+    use HasModel, HasValidation;
 
     /**
      * @param Request $request
@@ -29,9 +26,8 @@ trait HasStore
      */
     public function store(Request $request): RedirectResponse|JsonResponse
     {
-        $data = Validator::make($request->all(), $this->requestClass()->rules(), $this->requestClass()->messages())
-            ->validate();
-        $this->requestClass()->passedValidation();
+        $data = $this->getValidationData($request);
+
         DB::beginTransaction();
         try {
             $item = $this->model()->query()->create($data);
@@ -48,7 +44,12 @@ trait HasStore
     }
 
 
-    protected function storeCallback(Request $request,Model $item)
+    /**
+     * @param Request $request
+     * @param Model $item
+     * @return void
+     */
+    protected function storeCallback(Request $request, Model $item): void
     {
 
     }

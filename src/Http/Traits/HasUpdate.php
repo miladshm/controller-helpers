@@ -10,15 +10,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-use Miladshm\ControllerHelpers\Exceptions\ApiValidationException;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Miladshm\ControllerHelpers\Traits\HasModel;
+use Miladshm\ControllerHelpers\Traits\HasValidation;
 
 trait HasUpdate
 {
-    use HasModel;
+    use HasModel, HasValidation;
 
     /**
      * @param Request $request
@@ -28,9 +27,7 @@ trait HasUpdate
      */
     public function update(Request $request, $id): RedirectResponse|JsonResponse
     {
-        $requestClass = $this->updateRequestClass() ?? $this->requestClass();
-        $data = Validator::make($request->all(),$requestClass->rules(),$requestClass->messages())
-            ->setException(ApiValidationException::class)->validate();
+        $data = $this->getValidationData($request);
         $item = $this->model()->query()->findOrFail($id);
         DB::beginTransaction();
         try {
@@ -46,13 +43,6 @@ trait HasUpdate
         return Redirect::back()->with(Lang::get('responder::messages.success_update'));
 
     }
-
-    protected function updateRequestClass(): ?FormRequest
-    {
-        return null;
-    }
-
-    abstract private function requestClass(): FormRequest;
 
     protected function updateCallback(Request $request, Model $item)
     {
