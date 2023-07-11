@@ -36,10 +36,10 @@ class ResponseBuilder
     }
 
     /**
-     * @param ArrayAccess $data
+     * @param ArrayAccess|iterable $data
      * @return ResponseBuilder
      */
-    public function setData(ArrayAccess $data): ResponseBuilder
+    public function setData(ArrayAccess|iterable $data): ResponseBuilder
     {
         $this->data = $data;
         return $this;
