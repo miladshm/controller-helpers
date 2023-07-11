@@ -17,16 +17,20 @@ trait HasValidation
      */
     private function getValidationData(Request $request): array
     {
-        $requestClass = $this->updateRequestClass() ?? $this->requestClass();
 
-        return Validator::make($request->all(), $requestClass->rules(), $requestClass->messages())
+        return Validator::make($request->all(), $this->rules(), $this->messages())
             ->setException(ApiValidationException::class)->validate();
     }
 
-    protected function updateRequestClass(): ?FormRequest
+
+    abstract protected function rules(): array;
+
+    /**
+     * @return array
+     */
+    protected function messages(): array
     {
-        return null;
+        return [];
     }
 
-    abstract private function requestClass(): FormRequest;
 }

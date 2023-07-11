@@ -54,5 +54,17 @@ trait HasStore
 
     }
 
+    abstract private function requestClass(): FormRequest;
+
+    protected function rules(): array
+    {
+        return $this->requestClass()->rules();
+    }
+
+    protected function messages(): array
+    {
+        return $this->requestClass()->messages();
+    }
+
 
 }

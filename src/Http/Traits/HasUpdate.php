@@ -49,5 +49,23 @@ trait HasUpdate
 
     }
 
+    protected function updateRequestClass(): ?FormRequest
+    {
+        return null;
+    }
+
+    protected function rules(): array
+    {
+        $requestClass = $this->updateRequestClass() ?? $this->requestClass();
+
+        return $requestClass->rules();
+    }
+
+    protected function messages(): array
+    {
+        $requestClass = $this->updateRequestClass() ?? $this->requestClass();
+
+        return $requestClass->messages();
+    }
 
 }
