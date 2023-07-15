@@ -62,9 +62,9 @@ class ResponseBuilder
     }
 
     /**
-     * @return ArrayAccess
+     * @return ArrayAccess|iterable
      */
-    public function getData(): ArrayAccess
+    public function getData(): ArrayAccess|iterable
     {
         return $this->data;
     }
@@ -72,7 +72,7 @@ class ResponseBuilder
     public function respond(): JsonResponse
     {
         $response = [
-            'Status' => $this->code,
+            'Status' => $this->http_code,
             'Message' => $this->message ?? Lang::get('responder::messages.success_status.status')
         ];
         if (isset($this->data)) {
