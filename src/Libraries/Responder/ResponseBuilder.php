@@ -13,7 +13,7 @@ class ResponseBuilder
     private ?string $exception_message = null;
     private ?int $http_code = null;
     private int $code = 0;
-    private ArrayAccess $data;
+    private ArrayAccess|iterable $data;
 
     /**
      * @param string $message
