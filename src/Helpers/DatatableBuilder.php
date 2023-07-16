@@ -2,12 +2,12 @@
 
 namespace Miladshm\ControllerHelpers\Helpers;
 
-use Miladshm\ControllerHelpers\Http\Requests\ListRequest;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
+use Miladshm\ControllerHelpers\Http\Requests\ListRequest;
 
 class DatatableBuilder
 {
@@ -15,10 +15,11 @@ class DatatableBuilder
     private ListRequest $request;
     private array $fields = ['*'];
     private int $pageLength = 10;
-    private array $searchable = ['id','title', 'name', 'body', 'description'];
+    private array $searchable;
 
     public function __construct()
     {
+        $this->searchable = getConfigNames('search.default_searchable');
     }
 
 
@@ -28,15 +29,14 @@ class DatatableBuilder
      */
     private function paginate($pageLength = null): Paginator
     {
-        return $this->builder->select($this->fields)->paginate($this->request->pageLength ?? $pageLength);
+        return $this->builder->select($this->fields)->paginate($this->request->{getConfigNames('params.page_length')} ?? $pageLength);
     }
-
 
 
     /**
      * @param ListRequest $request
      * @param Model|null $model
-     * @return Paginator
+     * @return Paginator|Builder[]
      */
     public function grid(ListRequest $request, Model $model = null)
     {
@@ -57,17 +57,17 @@ class DatatableBuilder
      */
     private function search(): static
     {
-        $q = $this->request->q;
-        $searchable = $this->request->searchable ?? $this->searchable;
-        if ($this->request->filled('q')) {
-            $this->builder = $this->builder->where(function (Builder $s) use ( $q, $searchable) {
+        $q = $this->request->{getConfigNames('params.search')};
+        $searchable = $this->request->{getConfigNames('params.searchable_columns')} ?? $this->searchable;
+        if ($this->request->filled(getConfigNames('params.search'))) {
+            $this->builder = $this->builder->where(function (Builder $s) use ($q, $searchable) {
                 foreach ($searchable as $item) {
                     if (Str::contains($item, '.')) {
-                        $rel = Str::before($item,'.');
-                        $column = Str::after($item,'.');
+                        $rel = Str::before($item, '.');
+                        $column = Str::after($item, '.');
                         if (method_exists($this->builder->getModel(), $rel))
                             $s->orWhereHas($rel, function ($s) use ($q, $column) {
-                                if(Schema::hasColumn($s->getModel()->getTable(), $column))
+                                if (Schema::hasColumn($s->getModel()->getTable(), $column))
                                     $s->where($column, 'LIKE', '%' . $q . '%');
                             });
                     }
@@ -86,13 +86,13 @@ class DatatableBuilder
      */
     private function sortResult(): static
     {
-        if ($this->request->filled('sort.column')) {
-            $sort = $this->request->sort;
+        if ($this->request->filled(getConfigNames('params.sort') . ".column")) {
+            $sort = $this->request->{getConfigNames('params.sort')};
             $this->builder = $this->builder->orderBy($sort['column'] ?? "created_at", $sort['dir'] ?? "desc");
-        } elseif (Schema::hasColumn($this->builder->getModel()->getTable(),'order')) {
-            $this->builder = $this->builder->orderBy('order');
+        } elseif (Schema::hasColumn($this->builder->getModel()->getTable(), getConfigNames('order_column'))) {
+            $this->builder = $this->builder->orderBy(getConfigNames('order_column'));
         } else
-            $this->builder = $this->builder->latest('id');
+            $this->builder = $this->builder->latest($this->builder->getModel()->getKeyName());
 
         return $this;
     }

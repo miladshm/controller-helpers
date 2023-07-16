@@ -5,7 +5,10 @@
     "autoload": {
         "psr-4": {
             "Miladshm\\ControllerHelpers\\": "src/"
-        }
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
     "authors": [
         {
@@ -24,6 +27,6 @@
         "illuminate/pagination": ">=7.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.0"
+        "phpunit/phpunit": ">=9.0"
     }
 }

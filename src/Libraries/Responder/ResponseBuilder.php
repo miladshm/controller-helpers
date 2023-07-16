@@ -72,11 +72,11 @@ class ResponseBuilder
     public function respond(): JsonResponse
     {
         $response = [
-            'Status' => $this->http_code,
-            'Message' => $this->message ?? Lang::get('responder::messages.success_status.status')
+            getConfigNames('response.field_names.code') => $this->http_code,
+            getConfigNames('response.field_names.message') => $this->message ?? Lang::get('responder::messages.success_status.status')
         ];
         if (isset($this->data)) {
-            $response['Data'] = $this->data;
+            $response[getConfigNames('response.field_names.data')] = $this->data;
         }
 
 
