@@ -10,7 +10,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->loadTranslationsFrom(__DIR__ . "/../../lang", 'responder');
 
         $this->publishes([
-            __DIR__ . "/../../config/controller-helpers.php" => config_path('courier.php')
+            __DIR__ . "/../../config/controller-helpers.php" => config_path('controller-helpers.php')
         ]);
     }
 
