@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
 
 if (!function_exists('getConfigNames')) {
     function getConfigNames(string $name)
     {
-        return Cache::get("controller-helpers.{$name}");
+        return Config::get("controller-helpers.{$name}");
     }
 }
