@@ -16,7 +16,7 @@ return [
     ],
 
     'search' => [
-        'default_searchable'
+        'default_searchable' => ['id', 'name', 'title']
     ],
 
     'sort_direction' => 'asc', // acceptable values would be [asc,desc]
