@@ -28,5 +28,12 @@
     },
     "require-dev": {
         "phpunit/phpunit": ">=9.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Miladshm\\ControllerHelpers\\Providers\\ServiceProvider"
+            ]
+        }
     }
 }
