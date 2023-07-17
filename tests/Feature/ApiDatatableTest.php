@@ -20,14 +20,21 @@ class ApiDatatableTest extends TestCase
         $response = $this->index(new ListRequest, new DatatableBuilder());
 
         $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(200, $response->getData(true)[getConfigNames('response.field_names.code')], 'status is 200');
     }
 
     public function test_datatable_message()
     {
         $response = $this->index(new ListRequest, new DatatableBuilder());
-        __('responder::messages.success_status.status');
-        $this->assertArrayHasKey('message', $response->original, 'Datatable response has message');
-        $this->assertContainsEquals('message', $response->original, 'Datatable response has message');
+        $this->assertArrayHasKey(getConfigNames('response.field_names.message'), $response->getData(true), 'Datatable response has message');
+        $this->assertContainsEquals(__('responder::messages.success_status.status'), $response->getData(true), 'Datatable response message is correct');
+    }
+
+    public function test_datatable_data()
+    {
+        $response = $this->index(new ListRequest, new DatatableBuilder());
+
+        $this->assertArrayHasKey(getConfigNames('response.field_names.data'), $response->getData(true), 'Datatable response has data');
     }
 
     /**
