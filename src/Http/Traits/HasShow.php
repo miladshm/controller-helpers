@@ -3,12 +3,12 @@
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
-use Miladshm\ControllerHelpers\Traits\HasModel;
-use Miladshm\ControllerHelpers\Traits\HasRelations;
+use Miladshm\ControllerHelpers\Traits\WithModel;
+use Miladshm\ControllerHelpers\Traits\WithRelations;
 
 trait HasShow
 {
-    use HasModel, HasRelations;
+    use WithModel, WithRelations;
 
 
     public function show($id)

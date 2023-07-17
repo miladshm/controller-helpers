@@ -4,7 +4,7 @@ namespace Miladshm\ControllerHelpers\Traits;
 
 use Illuminate\Database\Eloquent\Model;
 
-trait HasModel
+trait WithModel
 {
     abstract private function model(): Model;
 

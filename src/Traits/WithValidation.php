@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Exceptions\ApiValidationException;
 
-trait HasValidation
+trait WithValidation
 {
 
     /**

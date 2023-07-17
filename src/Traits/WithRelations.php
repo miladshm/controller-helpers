@@ -2,7 +2,7 @@
 
 namespace Miladshm\ControllerHelpers\Traits;
 
-trait HasRelations
+trait WithRelations
 {
     abstract private function relations(): array;
 

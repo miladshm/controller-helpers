@@ -8,14 +8,14 @@ use Illuminate\Support\Facades\Request;
 use Miladshm\ControllerHelpers\Helpers\DatatableBuilder;
 use Miladshm\ControllerHelpers\Http\Requests\ListRequest;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
-use Miladshm\ControllerHelpers\Traits\HasExtraData;
-use Miladshm\ControllerHelpers\Traits\HasFilters;
-use Miladshm\ControllerHelpers\Traits\HasModel;
-use Miladshm\ControllerHelpers\Traits\HasRelations;
+use Miladshm\ControllerHelpers\Traits\WithExtraData;
+use Miladshm\ControllerHelpers\Traits\WithFilters;
+use Miladshm\ControllerHelpers\Traits\WithModel;
+use Miladshm\ControllerHelpers\Traits\WithRelations;
 
 trait HasApiDatatable
 {
-    use HasExtraData, HasRelations, HasModel, HasFilters;
+    use WithExtraData, WithRelations, WithModel, WithFilters;
 
     /**
      * Display a listing of the resource.

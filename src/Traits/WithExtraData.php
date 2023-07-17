@@ -4,7 +4,7 @@ namespace Miladshm\ControllerHelpers\Traits;
 
 use Illuminate\Database\Eloquent\Model;
 
-trait HasExtraData
+trait WithExtraData
 {
     abstract private function extraData(Model $item = null): ?array;
 

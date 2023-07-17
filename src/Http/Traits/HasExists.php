@@ -5,13 +5,13 @@ namespace Miladshm\ControllerHelpers\Http\Traits;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
-use Miladshm\ControllerHelpers\Traits\HasFilters;
-use Miladshm\ControllerHelpers\Traits\HasModel;
-use Miladshm\ControllerHelpers\Traits\HasValidation;
+use Miladshm\ControllerHelpers\Traits\WithFilters;
+use Miladshm\ControllerHelpers\Traits\WithModel;
+use Miladshm\ControllerHelpers\Traits\WithValidation;
 
 trait HasExists
 {
-    use HasModel, HasFilters, HasValidation;
+    use WithModel, WithFilters, WithValidation;
 
     public function exists(Request $request)
     {

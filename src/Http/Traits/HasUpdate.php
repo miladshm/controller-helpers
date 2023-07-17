@@ -12,12 +12,13 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
-use Miladshm\ControllerHelpers\Traits\HasModel;
-use Miladshm\ControllerHelpers\Traits\HasValidation;
+use Miladshm\ControllerHelpers\Traits\WithModel;
+use Miladshm\ControllerHelpers\Traits\WithRequestClass;
+use Miladshm\ControllerHelpers\Traits\WithValidation;
 
 trait HasUpdate
 {
-    use HasModel, HasValidation;
+    use WithModel, WithValidation, WithRequestClass;
 
     /**
      * @param Request $request
@@ -41,6 +42,11 @@ trait HasUpdate
         if ($request->expectsJson())
             return ResponderFacade::setData($item->toArray())->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
         return Redirect::back()->with(Lang::get('responder::messages.success_update'));
+
+    }
+
+    protected function prepareForUpdate(Request &$request)
+    {
 
     }
 

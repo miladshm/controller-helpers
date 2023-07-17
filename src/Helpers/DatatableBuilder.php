@@ -15,7 +15,7 @@ class DatatableBuilder
     private ListRequest $request;
     private array $fields = ['*'];
     private int $pageLength = 10;
-    private array $searchable;
+    private ?array $searchable;
 
     public function __construct()
     {
@@ -61,7 +61,7 @@ class DatatableBuilder
         $searchable = $this->request->{getConfigNames('params.searchable_columns')} ?? $this->searchable;
         if ($this->request->filled(getConfigNames('params.search'))) {
             $this->builder = $this->builder->where(function (Builder $s) use ($q, $searchable) {
-                foreach ($searchable as $item) {
+                foreach ($searchable ?? [] as $item) {
                     if (Str::contains($item, '.')) {
                         $rel = Str::before($item, '.');
                         $column = Str::after($item, '.');
@@ -70,8 +70,7 @@ class DatatableBuilder
                                 if (Schema::hasColumn($s->getModel()->getTable(), $column))
                                     $s->where($column, 'LIKE', '%' . $q . '%');
                             });
-                    }
-                    elseif (Schema::hasColumn($this->builder->getModel()->getTable(), $item))
+                    } elseif (Schema::hasColumn($this->builder->getModel()->getTable(), $item))
                         $s->orwhere($item, 'LIKE', '%' . $q . '%');
                 }
             });
@@ -88,7 +87,7 @@ class DatatableBuilder
     {
         if ($this->request->filled(getConfigNames('params.sort') . ".column")) {
             $sort = $this->request->{getConfigNames('params.sort')};
-            $this->builder = $this->builder->orderBy($sort['column'] ?? "created_at", $sort['dir'] ?? "desc");
+            $this->builder = $this->builder->orderBy($sort['column'] ?? $this->builder->getModel()->getKeyName(), $sort['dir'] ?? "desc");
         } elseif (Schema::hasColumn($this->builder->getModel()->getTable(), getConfigNames('order_column'))) {
             $this->builder = $this->builder->orderBy(getConfigNames('order_column'));
         } else

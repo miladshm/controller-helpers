@@ -7,14 +7,14 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Request;
 use Illuminate\View\View;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
-use Miladshm\ControllerHelpers\Traits\HasExtraData;
-use Miladshm\ControllerHelpers\Traits\HasFilters;
-use Miladshm\ControllerHelpers\Traits\HasModel;
-use Miladshm\ControllerHelpers\Traits\HasRelations;
+use Miladshm\ControllerHelpers\Traits\WithExtraData;
+use Miladshm\ControllerHelpers\Traits\WithFilters;
+use Miladshm\ControllerHelpers\Traits\WithModel;
+use Miladshm\ControllerHelpers\Traits\WithRelations;
 
 trait HasIndex
 {
-    use HasFilters, HasModel, HasExtraData, HasRelations;
+    use WithFilters, WithModel, WithExtraData, WithRelations;
 
     abstract private function indexView(): View;
 

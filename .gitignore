@@ -1,4 +1,5 @@
 ### Laravel template
 /vendor/
 phpunit.xml.bak
-.idea
+/.idea/
+/.phpunit.cache/

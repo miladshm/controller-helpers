@@ -3,7 +3,6 @@
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,12 +11,13 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
-use Miladshm\ControllerHelpers\Traits\HasModel;
-use Miladshm\ControllerHelpers\Traits\HasValidation;
+use Miladshm\ControllerHelpers\Traits\WithModel;
+use Miladshm\ControllerHelpers\Traits\WithRequestClass;
+use Miladshm\ControllerHelpers\Traits\WithValidation;
 
 trait HasStore
 {
-    use HasModel, HasValidation;
+    use WithModel, WithValidation, WithRequestClass;
 
     /**
      * @param Request $request
@@ -54,7 +54,6 @@ trait HasStore
 
     }
 
-    abstract private function requestClass(): FormRequest;
 
     protected function rules(): array
     {

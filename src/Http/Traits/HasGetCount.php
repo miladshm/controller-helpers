@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
-use Miladshm\ControllerHelpers\Traits\HasFilters;
-use Miladshm\ControllerHelpers\Traits\HasModel;
+use Miladshm\ControllerHelpers\Traits\WithFilters;
+use Miladshm\ControllerHelpers\Traits\WithModel;
 
 trait HasGetCount
 {
-    use HasModel, HasFilters;
+    use WithModel, WithFilters;
 
     /**
      * @param string|null $group_by

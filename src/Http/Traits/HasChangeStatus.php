@@ -6,11 +6,11 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
-use Miladshm\ControllerHelpers\Traits\HasModel;
+use Miladshm\ControllerHelpers\Traits\WithModel;
 
 trait HasChangeStatus
 {
-    use HasModel;
+    use WithModel;
 
     public function changeStatus(int $id, string $statusColumn = 'status')
     {
