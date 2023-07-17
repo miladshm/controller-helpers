@@ -16,12 +16,12 @@ jobs:
 
     steps:
     - name: Install dependencies
-      working-directory: ./app
+      working-directory: ../../
       run: composer install --prefer-dist --no-progress
 
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
     - name: Run test suite
-      working-directory: ./app
+      working-directory: ../../
       run: composer run-script test
