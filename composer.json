@@ -35,5 +35,8 @@
                 "Miladshm\\ControllerHelpers\\Providers\\ServiceProvider"
             ]
         }
+    },
+    "scripts": {
+        "test": "./vendor/phpunit/phpunit/phpunit"
     }
 }
