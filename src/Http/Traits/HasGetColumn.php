@@ -22,7 +22,12 @@ trait HasGetColumn
      */
     public function getColumn(Request $request): JsonResponse
     {
-        $this->getValidationData($request);
+        $this->setRules([
+            'column' => ['required'],
+            'column.*' => ['string']
+        ])
+            ->getValidationData($request);
+
         $res = $this->model()
             ->query()
             ->select($request->collect('column')->toArray())
@@ -46,15 +51,6 @@ trait HasGetColumn
                 ->values();
 //
         return ResponderFacade::setData($res)->respond();
-    }
-
-
-    protected function rules(): array
-    {
-        return [
-            'column' => ['required'],
-            'column.*' => ['string']
-        ];
     }
 
 }

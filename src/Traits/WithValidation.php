@@ -10,6 +10,35 @@ use Miladshm\ControllerHelpers\Exceptions\ApiValidationException;
 trait WithValidation
 {
 
+    private array $rules;
+    private array $messages;
+
+    /**
+     * @return array
+     */
+    public function getRules(): array
+    {
+        return $this->rules;
+    }
+
+    /**
+     * @param array $rules
+     * @return WithValidation
+     */
+    public function setRules(array $rules): static
+    {
+        $this->rules = $rules;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getMessages(): array
+    {
+        return $this->messages;
+    }
+
     /**
      * @param Request $request
      * @return array
@@ -17,20 +46,18 @@ trait WithValidation
      */
     private function getValidationData(Request $request): array
     {
-
-        return Validator::make($request->all(), $this->rules(), $this->messages())
+        return Validator::make($request->all(), $this->getRules(), $this->getMessages())
             ->setException(ApiValidationException::class)->validate();
     }
 
-
-    abstract protected function rules(): array;
-
     /**
-     * @return array
+     * @param array $messages
+     * @return WithValidation
      */
-    protected function messages(): array
+    protected function setMessages(array $messages): static
     {
-        return [];
+        $this->messages = $messages;
+        return $this;
     }
 
 }

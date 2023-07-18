@@ -26,10 +26,14 @@ trait HasStore
      */
     public function store(Request $request): RedirectResponse|JsonResponse
     {
-        $data = $this->getValidationData($request);
+        $data = $this
+            ->setRules($this->requestClass()->rules())
+            ->setMessages($this->requestClass()->messages())
+            ->getValidationData($request);
 
         DB::beginTransaction();
         try {
+            $this->prepareForStore($request);
             $item = $this->model()->query()->create($data);
             $this->storeCallback($request, $item);
 
@@ -54,15 +58,9 @@ trait HasStore
 
     }
 
-
-    protected function rules(): array
+    protected function prepareForStore(Request &$request)
     {
-        return $this->requestClass()->rules();
-    }
 
-    protected function messages(): array
-    {
-        return $this->requestClass()->messages();
     }
 
 

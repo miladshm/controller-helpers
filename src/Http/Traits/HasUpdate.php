@@ -28,10 +28,13 @@ trait HasUpdate
      */
     public function update(Request $request, $id): RedirectResponse|JsonResponse
     {
-        $data = $this->getValidationData($request);
+        $requestClass = $this->updateRequestClass() ?? $this->requestClass();
+        $data = $this->setRules($requestClass->rules())->setMessages($requestClass->messages())->getValidationData($request);
+
         $item = $this->model()->query()->findOrFail($id);
         DB::beginTransaction();
         try {
+            $this->prepareForUpdate($request);
             $item->update($data);
             $this->updateCallback($request, $item);
         } catch (\Exception $exception) {
@@ -62,9 +65,7 @@ trait HasUpdate
 
     protected function rules(): array
     {
-        $requestClass = $this->updateRequestClass() ?? $this->requestClass();
 
-        return $requestClass->rules();
     }
 
     protected function messages(): array
