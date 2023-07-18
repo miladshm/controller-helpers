@@ -20,6 +20,7 @@ class ApiDatatableTest extends TestCase
         $response = $this->index(new ListRequest, new DatatableBuilder());
 
         $this->assertEquals(200, $response->getStatusCode());
+        $this->assertContainsEquals(200, $response->getData(true), 'Datatable response status is ok');
         $this->assertEquals(200, $response->getData(true)[getConfigNames('response.field_names.code')], 'status is 200');
     }
 
@@ -35,6 +36,11 @@ class ApiDatatableTest extends TestCase
         $response = $this->index(new ListRequest, new DatatableBuilder());
 
         $this->assertArrayHasKey(getConfigNames('response.field_names.data'), $response->getData(true), 'Datatable response has data');
+        $this->assertIsArray($response->getData(true)[getConfigNames('response.field_names.data')], 'Datatable response has data');
+        $this->assertArrayHasKey('items', $response->getData(true)[getConfigNames('response.field_names.data')], 'Datatable data has items.');
+        $this->assertArrayHasKey('data', $response->getData(true)[getConfigNames('response.field_names.data')]['items'], 'Datatable data.items has data');
+        $this->assertIsArray($response->getData(true)[getConfigNames('response.field_names.data')]['items']['data'], 'Datatable data.items.data is array');
+
     }
 
     /**
