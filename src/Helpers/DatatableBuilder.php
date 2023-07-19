@@ -4,7 +4,8 @@ namespace Miladshm\ControllerHelpers\Helpers;
 
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Miladshm\ControllerHelpers\Http\Requests\ListRequest;
@@ -12,9 +13,10 @@ use Miladshm\ControllerHelpers\Http\Requests\ListRequest;
 class DatatableBuilder
 {
     public Builder $builder;
-    private ListRequest $request;
+    private ListRequest|FormRequest $request;
     private array $fields = ['*'];
     private int $pageLength = 10;
+    private string $order = 'desc';
     private ?array $searchable;
 
     public function __construct()
@@ -22,40 +24,37 @@ class DatatableBuilder
         $this->searchable = getConfigNames('search.default_searchable');
     }
 
-
     /**
-     * @param null $pageLength
-     * @return Paginator
+     * @param FormRequest|ListRequest $request
+     * @return DatatableBuilder
      */
-    private function paginate($pageLength = null): Paginator
+    public function setRequest(FormRequest|ListRequest $request): DatatableBuilder
     {
-        return $this->builder->select($this->fields)->paginate($this->request->{getConfigNames('params.page_length')} ?? $pageLength);
+        $this->request = $request;
+        return $this;
     }
 
 
     /**
-     * @param ListRequest $request
-     * @param Model|null $model
-     * @return Paginator|Builder[]
+     * @return Paginator|Collection
      */
-    public function grid(ListRequest $request, Model $model = null)
+    public function paginate(): Paginator|Collection
     {
-        $this->builder = $model?->newQuery() ?? $this->builder;
-        $this->request = $request;
-        $results = $this->search()->sortResult();
-
-        if ($request->boolean('all'))
-            return $results->builder->get();
-        else
-            return $results->paginate($request->pageLength ?? $this->pageLength)
+        $this->builder = $this->builder->select($this->fields);
+        return $this->request->boolean('all')
+            ? $this->builder->get()
+            : $this->builder
+                ->paginate($this->request->{getConfigNames('params.page_length')} ?? $this->pageLength)
                 ->withQueryString();
     }
+
+
 
 
     /**
      * @return $this
      */
-    private function search(): static
+    public function search(): static
     {
         $q = $this->request->{getConfigNames('params.search')};
         $searchable = $this->request->{getConfigNames('params.searchable_columns')} ?? $this->searchable;
@@ -83,7 +82,7 @@ class DatatableBuilder
     /**
      * @return $this
      */
-    private function sortResult(): static
+    public function sortResult(): static
     {
         if ($this->request->filled(getConfigNames('params.sort') . ".column")) {
             $sort = $this->request->{getConfigNames('params.sort')};
@@ -91,7 +90,7 @@ class DatatableBuilder
         } elseif (Schema::hasColumn($this->builder->getModel()->getTable(), getConfigNames('order_column'))) {
             $this->builder = $this->builder->orderBy(getConfigNames('order_column'));
         } else
-            $this->builder = $this->builder->latest($this->builder->getModel()->getKeyName());
+            $this->builder = $this->builder->orderBy($this->builder->getModel()->getKeyName(), $this->order);
 
         return $this;
     }
@@ -133,6 +132,16 @@ class DatatableBuilder
     public function setFields(?array $fields): DatatableBuilder
     {
         $this->fields = $fields ?? ['*'];
+        return $this;
+    }
+
+    /**
+     * @param string $order
+     * @return DatatableBuilder
+     */
+    public function setOrder(string $order): DatatableBuilder
+    {
+        $this->order = $order;
         return $this;
     }
 }

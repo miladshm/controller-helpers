@@ -17,6 +17,8 @@ trait HasApiDatatable
 {
     use WithExtraData, WithRelations, WithModel, WithFilters;
 
+    private string $order = 'desc';
+
     /**
      * Display a listing of the resource.
      *
@@ -26,10 +28,16 @@ trait HasApiDatatable
      */
     public function index(ListRequest $request, DatatableBuilder $datatable): JsonResponse
     {
-        $items = $datatable->setBuilder($this->getItems())
+        $items = $datatable
+            ->setBuilder($this->getItems())
             ->setSearchable($this->setSearchable())
             ->setPageLength($this->setPageLength())
-            ->grid($request);
+            ->setRequest($request)
+            ->setOrder($this->order)
+            ->search()
+            ->sortResult()
+            ->paginate();
+
         $filters = Request::query();
         $data = compact('items', 'filters') + $this->extraData();
 
