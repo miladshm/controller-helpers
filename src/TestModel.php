@@ -9,6 +9,8 @@ class TestModel extends \Illuminate\Database\Eloquent\Model
 {
     use HasFactory;
 
+    protected $fillable = ['code'];
+
     protected $connection = 'testbench';
 
     protected static function newFactory()

@@ -46,8 +46,12 @@ trait WithValidation
      */
     private function getValidationData(Request $request): array
     {
-        return Validator::make($request->all(), $this->getRules(), $this->getMessages())
-            ->setException(ApiValidationException::class)->validate();
+        $validator = Validator::make($request->all(), $this->getRules(), $this->getMessages());
+
+        if ($request->expectsJson())
+            $validator = $validator->setException(ApiValidationException::class);
+
+        return $validator->validate();
     }
 
     /**

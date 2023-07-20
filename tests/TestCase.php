@@ -2,7 +2,7 @@
 
 namespace Miladshm\ControllerHelpers\Tests;
 
-use Miladshm\ControllerHelpers\Providers\ServiceProvider;
+use Miladshm\ControllerHelpers\Providers\TestServiceProvider;
 use Miladshm\ControllerHelpers\TestModel;
 
 class TestCase extends \Orchestra\Testbench\TestCase
@@ -21,7 +21,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
     protected function getPackageProviders($app)
     {
         return [
-            ServiceProvider::class
+            TestServiceProvider::class
         ];
     }
 

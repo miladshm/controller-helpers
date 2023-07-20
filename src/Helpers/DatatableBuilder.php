@@ -144,4 +144,36 @@ class DatatableBuilder
         $this->order = $order;
         return $this;
     }
+
+    /**
+     * @return array|string[]
+     */
+    public function getFields(): array
+    {
+        return $this->fields;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPageLength(): int
+    {
+        return $this->pageLength;
+    }
+
+    /**
+     * @return array|mixed|null
+     */
+    public function getSearchable(): mixed
+    {
+        return $this->searchable;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOrder(): string
+    {
+        return $this->order;
+    }
 }
