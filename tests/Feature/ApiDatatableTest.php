@@ -3,6 +3,7 @@
 namespace Miladshm\ControllerHelpers\Tests\Feature;
 
 
+use Illuminate\Support\Arr;
 use Miladshm\ControllerHelpers\Tests\TestCase;
 
 class ApiDatatableTest extends TestCase
@@ -15,5 +16,17 @@ class ApiDatatableTest extends TestCase
         $response->assertJsonStructure(getConfigNames('response.field_names'));
         $response->assertJsonIsObject(getConfigNames('response.field_names.data'));
         $response->assertSeeText(__('responder::messages.success_status.status'));
+    }
+
+    public function test_datatable_response_page_length()
+    {
+        $query = Arr::query([getConfigNames('params.page_length') => $length = fake()->randomNumber(3)]);
+        $response = $this->get("/testing?$query");
+
+        $response->assertSuccessful();
+        $response->assertJsonStructure(getConfigNames('response.field_names'));
+        $response->assertJsonIsObject(getConfigNames('response.field_names.data'));
+        $response->assertSeeText(__('responder::messages.success_status.status'));
+        $response->assertJsonPath(getConfigNames('response.field_names.data') . ".items.per_page", $length);
     }
 }
