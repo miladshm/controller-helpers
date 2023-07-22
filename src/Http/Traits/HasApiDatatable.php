@@ -33,7 +33,7 @@ trait HasApiDatatable
             ->setSearchable($this->setSearchable())
             ->setPageLength($this->setPageLength())
             ->setRequest($request)
-            ->setOrder($this->order)
+            ->setOrder($this->getOrder())
             ->search()
             ->sortResult()
             ->paginate();
@@ -69,6 +69,16 @@ trait HasApiDatatable
     protected function setColumns(): array
     {
         return ['*'];
+    }
+
+
+    /**
+     * Order can be either 'asc' or 'desc', default value in 'desc'
+     * @return string
+     */
+    protected function getOrder(): string
+    {
+        return $this->order;
     }
 }
 

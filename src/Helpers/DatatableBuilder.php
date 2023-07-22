@@ -86,7 +86,7 @@ class DatatableBuilder
     {
         if ($this->request->filled(getConfigNames('params.sort') . ".column")) {
             $sort = $this->request->{getConfigNames('params.sort')};
-            $this->builder = $this->builder->orderBy($sort['column'] ?? $this->builder->getModel()->getKeyName(), $sort['dir'] ?? "desc");
+            $this->builder = $this->builder->orderBy($sort['column'] ?? $this->builder->getModel()->getKeyName(), $sort['dir'] ?? $this->order);
         } elseif (Schema::hasColumn($this->builder->getModel()->getTable(), getConfigNames('order_column'))) {
             $this->builder = $this->builder->orderBy(getConfigNames('order_column'));
         } else
