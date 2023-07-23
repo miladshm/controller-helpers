@@ -27,6 +27,6 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('requests');
+        Schema::dropIfExists('test_models');
     }
 };
