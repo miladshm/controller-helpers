@@ -11,7 +11,7 @@ trait WithValidation
 {
 
     private array $rules;
-    private array $messages;
+    private ?array $messages;
 
     /**
      * @return array
@@ -32,11 +32,11 @@ trait WithValidation
     }
 
     /**
-     * @return array
+     * @return array|null
      */
     public function getMessages(): array
     {
-        return $this->messages;
+        return $this->messages ?? [];
     }
 
     /**
