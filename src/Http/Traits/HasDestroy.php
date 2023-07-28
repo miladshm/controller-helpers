@@ -30,6 +30,8 @@ trait HasDestroy
             })
             ->findOrFail($id);
 
+        $this->prepareForDestroy($item);
+
         if ($item->deleted_at)
             $item->forceDelete();
         else
@@ -38,5 +40,10 @@ trait HasDestroy
         if (Request::expectsJson())
             return ResponderFacade::setMessage(Lang::get('responder::messages.success_delete.status'))->respond();
         return Redirect::back()->with(Lang::get('responder::messages.success_delete'));
+    }
+
+    protected function prepareForDestroy(Model $item): void
+    {
+
     }
 }
