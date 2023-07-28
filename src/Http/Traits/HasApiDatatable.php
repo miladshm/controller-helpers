@@ -18,6 +18,9 @@ trait HasApiDatatable
     use WithExtraData, WithRelations, WithModel, WithFilters;
 
     private string $order = 'desc';
+    private int $pageLength = 10;
+    private array $searchable = [];
+    private array $columns = ['*'];
 
     /**
      * Display a listing of the resource.
@@ -30,8 +33,8 @@ trait HasApiDatatable
     {
         $items = $datatable
             ->setBuilder($this->getItems())
-            ->setSearchable($this->setSearchable())
-            ->setPageLength($this->setPageLength())
+            ->setSearchable($this->getSearchable())
+            ->setPageLength($this->getPageLength())
             ->setRequest($request)
             ->setOrder($this->getOrder())
             ->search()
@@ -44,20 +47,15 @@ trait HasApiDatatable
         return ResponderFacade::setData($data)->respond();
     }
 
-    protected function setPageLength(): ?int
+    protected function setPageLength(int $pageLength): void
     {
-        return null;
-    }
-
-    protected function setSearchable(): ?array
-    {
-        return null;
+        $this->pageLength = $pageLength;
     }
 
     private function getItems(): Builder
     {
         return $this->model()->query()
-            ->select($this->setColumns())
+            ->select($this->getColumns())
             ->when(count($this->relations()), function ($q) {
                 $q->with($this->relations());
             })
@@ -66,12 +64,6 @@ trait HasApiDatatable
             });
     }
 
-    protected function setColumns(): array
-    {
-        return ['*'];
-    }
-
-
     /**
      * Order can be either 'asc' or 'desc', default value in 'desc'
      * @return string
@@ -79,6 +71,30 @@ trait HasApiDatatable
     protected function getOrder(): string
     {
         return $this->order;
+    }
+
+    /**
+     * @return int
+     */
+    protected function getPageLength(): int
+    {
+        return $this->pageLength;
+    }
+
+    /**
+     * @return array
+     */
+    protected function getSearchable(): array
+    {
+        return $this->searchable;
+    }
+
+    /**
+     * @return array|string[]
+     */
+    public function getColumns(): array
+    {
+        return $this->columns;
     }
 }
 

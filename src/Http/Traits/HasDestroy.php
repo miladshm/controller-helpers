@@ -11,10 +11,11 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
+use Miladshm\ControllerHelpers\Traits\WithModel;
 
 trait HasDestroy
 {
-    abstract private function model(): Model;
+    use WithModel;
 
 
     /**
