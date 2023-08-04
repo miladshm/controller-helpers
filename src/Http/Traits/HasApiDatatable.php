@@ -85,7 +85,7 @@ trait HasApiDatatable
      */
     protected function getOrder(): string
     {
-        return static::$order ?? 'desc';
+        return static::$order ?? getConfigNames('sort_direction');
     }
 
     /**
@@ -93,7 +93,7 @@ trait HasApiDatatable
      */
     protected function getPageLength(): int
     {
-        return static::$pageLength ?? 10;
+        return static::$pageLength ?? getConfigNames('default_page_length');
     }
 
     /**
@@ -101,7 +101,7 @@ trait HasApiDatatable
      */
     protected function getSearchable(): array
     {
-        return static::$searchable;
+        return static::$searchable ?? getConfigNames('search.default_searchable');
     }
 
     /**

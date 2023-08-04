@@ -29,4 +29,15 @@ class ApiDatatableTest extends TestCase
         $response->assertSeeText(__('responder::messages.success_status.status'));
         $response->assertJsonPath(getConfigNames('response.field_names.data') . ".items.per_page", $length);
     }
+
+    public function test_datatable_response_default_page_length()
+    {
+        $response = $this->get("/testing");
+
+        $response->assertSuccessful();
+        $response->assertJsonStructure(getConfigNames('response.field_names'));
+        $response->assertJsonIsObject(getConfigNames('response.field_names.data'));
+        $response->assertSeeText(__('responder::messages.success_status.status'));
+        $response->assertJsonPath(getConfigNames('response.field_names.data') . ".items.per_page", getConfigNames("default_page_length"));
+    }
 }

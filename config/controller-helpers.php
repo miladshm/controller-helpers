@@ -19,7 +19,8 @@ return [
         'default_searchable' => ['id', 'name', 'title']
     ],
 
-    'sort_direction' => 'asc', // acceptable values would be [asc,desc]
-    'order_column' => 'order'
+    'sort_direction' => 'desc', // acceptable values would be [asc,desc]
+    'order_column' => 'order',
+    'default_page_length' => 15
 
 ];
