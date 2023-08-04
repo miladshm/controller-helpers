@@ -17,10 +17,25 @@ trait HasApiDatatable
 {
     use WithExtraData, WithRelations, WithModel, WithFilters;
 
-    private string $order = 'desc';
-    private int $pageLength = 10;
-    private array $searchable = [];
-    private array $columns = ['*'];
+    /**
+     * @var string|null
+     */
+    private static ?string $order;
+
+    /**
+     * @var int|null
+     */
+    private static ?int $pageLength;
+
+    /**
+     * @var array|string[]
+     */
+    private static array $searchable = [];
+
+    /**
+     * @var array|string[]
+     */
+    private static array $columns = ['*'];
 
     /**
      * Display a listing of the resource.
@@ -49,7 +64,7 @@ trait HasApiDatatable
 
     protected function setPageLength(int $pageLength): void
     {
-        $this->pageLength = $pageLength;
+        static::$pageLength = $pageLength;
     }
 
     private function getItems(): Builder
@@ -70,7 +85,7 @@ trait HasApiDatatable
      */
     protected function getOrder(): string
     {
-        return $this->order;
+        return static::$order ?? 'desc';
     }
 
     /**
@@ -78,7 +93,7 @@ trait HasApiDatatable
      */
     protected function getPageLength(): int
     {
-        return $this->pageLength;
+        return static::$pageLength ?? 10;
     }
 
     /**
@@ -86,7 +101,7 @@ trait HasApiDatatable
      */
     protected function getSearchable(): array
     {
-        return $this->searchable;
+        return static::$searchable;
     }
 
     /**
@@ -94,7 +109,7 @@ trait HasApiDatatable
      */
     public function getColumns(): array
     {
-        return $this->columns;
+        return static::$columns;
     }
 }
 

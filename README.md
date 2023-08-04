@@ -95,7 +95,17 @@ use Miladshm\ControllerHelpers\Http\Traits\HasApiDatatable;
 class TestController extends Controller
 {
     use HasApiDatatable;
-    private string $order = 'desc'; // value can be 'desc' or 'asc'
+    
+    /**
+     * Order can be either 'asc' or 'desc', default value in 'desc'
+     * @return string
+     */
+    protected function getOrder(): string
+    {
+        return 'desc'; // value can be 'desc' or 'asc'
+    } 
+    
+    ...
 }
 ````
 
@@ -108,7 +118,16 @@ use Miladshm\ControllerHelpers\Http\Traits\HasApiDatatable;
 class TestController extends Controller
 {
     use HasApiDatatable;
-    private int $pageLength = 10;
+    
+    /**
+     * @return int
+     */
+    protected function getPageLength(): int
+    {
+        return 15;
+    }
+    
+    ...
 }
 ````
 
@@ -121,7 +140,16 @@ use Miladshm\ControllerHelpers\Http\Traits\HasApiDatatable;
 class TestController extends Controller
 {
     use HasApiDatatable;
-    private array $columns = ['id', 'code', 'name'];
+    
+    /**
+     * @return array|string[]
+     */
+    public function getColumns(): array
+    {
+        return ['id', 'code', 'name'];
+    }
+    
+    ...
 }
 ````
 
@@ -134,6 +162,14 @@ use Miladshm\ControllerHelpers\Http\Traits\HasApiDatatable;
 class TestController extends Controller
 {
     use HasApiDatatable;
-    private array $searchable = ['id', 'code', 'name', 'relation.column']; // You can specify relation columns to search within
+    
+    /**
+     * @return array
+     */
+    protected function getSearchable(): array
+    {
+        return ['id', 'code', 'name', 'relation.column']; // You can specify relation columns to search within
+    }
+    ...
 }
 ````
