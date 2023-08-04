@@ -6,6 +6,12 @@
   composer require miladshm/controller-helpers
 ```
 
+### Configuration
+
+```shell
+  php artisan vendor:publish --tag controller-helpers-config
+```
+
 ## Usage
 
 ### API Datatable
