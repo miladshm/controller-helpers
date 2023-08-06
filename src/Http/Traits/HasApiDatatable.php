@@ -23,6 +23,11 @@ trait HasApiDatatable
     private static ?string $order;
 
     /**
+     * @var string|null
+     */
+    private static ?string $paginator;
+
+    /**
      * @var int|null
      */
     private static ?int $pageLength;
@@ -38,6 +43,22 @@ trait HasApiDatatable
     private static array $columns = ['*'];
 
     /**
+     * @return string|null
+     */
+    public function getPaginator(): ?string
+    {
+        return self::$paginator;
+    }
+
+    /**
+     * @param string|null $paginator
+     */
+    public function setPaginator(?string $paginator): void
+    {
+        self::$paginator = $paginator;
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @param ListRequest $request
@@ -50,6 +71,7 @@ trait HasApiDatatable
             ->setBuilder($this->getItems())
             ->setSearchable($this->getSearchable())
             ->setPageLength($this->getPageLength())
+            ->setPaginator($this->getPaginator())
             ->setRequest($request)
             ->setOrder($this->getOrder())
             ->search()

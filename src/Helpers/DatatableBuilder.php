@@ -6,6 +6,7 @@ use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Miladshm\ControllerHelpers\Http\Requests\ListRequest;
@@ -18,6 +19,7 @@ class DatatableBuilder
     private int $pageLength = 10;
     private string $order = 'desc';
     private ?array $searchable;
+    private string $paginator;
 
     public function __construct()
     {
@@ -36,15 +38,15 @@ class DatatableBuilder
 
 
     /**
-     * @return Paginator|Collection
+     * @return Paginator|Collection|CursorPaginator
      */
-    public function paginate(): Paginator|Collection
+    public function paginate(): Paginator|Collection|CursorPaginator
     {
         $this->builder = $this->builder->select($this->fields);
         return $this->request->boolean('all')
             ? $this->builder->get()
             : $this->builder
-                ->paginate($this->request->{getConfigNames('params.page_length')} ?? $this->pageLength)
+                ->{$this->getPaginatorMethodName()}($this->request->{getConfigNames('params.page_length')} ?? $this->pageLength)
                 ->withQueryString();
     }
 
@@ -175,5 +177,32 @@ class DatatableBuilder
     public function getOrder(): string
     {
         return $this->order;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPaginator(): string
+    {
+        return $this->paginator ?? 'full';
+    }
+
+    private function getPaginatorMethodName(): string
+    {
+        return match ($this->getPaginator()) {
+            default => 'paginate',
+            'simple' => 'simplePaginate',
+            'cursor' => 'cursorPaginate',
+        };
+    }
+
+    /**
+     * @param string $paginator
+     * @return DatatableBuilder
+     */
+    public function setPaginator(string $paginator = 'full'): DatatableBuilder
+    {
+        $this->paginator = $paginator;
+        return $this;
     }
 }

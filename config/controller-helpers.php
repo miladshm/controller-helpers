@@ -21,6 +21,7 @@ return [
 
     'sort_direction' => 'desc', // acceptable values would be [asc,desc]
     'order_column' => 'order',
-    'default_page_length' => 15
+    'default_page_length' => 15,
+    'default_pagination_type' => 'full' // value can be [full,simple,cursor]
 
 ];
