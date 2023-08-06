@@ -173,3 +173,24 @@ class TestController extends Controller
     ...
 }
 ````
+
+#### Set pagination type
+
+You can choose index pagination type between default, simple and cursor paginator.
+
+````php
+
+use Miladshm\ControllerHelpers\Http\Traits\HasApiDatatable;
+
+class TestController extends Controller
+{
+    use HasApiDatatable;
+    
+    protected function getPaginator(): ?string
+    {
+        return 'simple'; // value can be [default,simple,cursor]
+    }
+    
+    ...
+}
+````

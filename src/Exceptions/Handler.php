@@ -57,7 +57,9 @@ class Handler extends ExceptionHandler
 
         $this->renderable(function (\Exception $e, $request) {
             if (App::environment('production'))
-                return \response()->json(['message' => 'خطای سرور رخ داده لطفا با پشتیبانی تماس بگیرید'], 500);
+                return ResponderFacade::setMessage('خطای سرور رخ داده لطفا با پشتیبانی تماس بگیرید')->respondError();
+            else
+                return ResponderFacade::setMessage($e->getMessage())->setData($e->getTrace())->respondError();
         });
     }
 

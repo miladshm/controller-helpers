@@ -17,4 +17,8 @@
       <directory>src</directory>
     </include>
   </source>
+  <php>
+    <ini name="display_errors" value="On"/>
+    <ini name="display_startup_errors" value="On"/>
+  </php>
 </phpunit>

@@ -15,16 +15,11 @@ class DatatableBuilder
 {
     public Builder $builder;
     private ListRequest|FormRequest $request;
-    private array $fields = ['*'];
-    private int $pageLength = 10;
-    private string $order = 'desc';
+    private ?array $fields;
+    private ?int $pageLength;
+    private ?string $order;
     private ?array $searchable;
-    private string $paginator;
-
-    public function __construct()
-    {
-        $this->searchable = getConfigNames('search.default_searchable');
-    }
+    private ?string $paginator;
 
     /**
      * @param FormRequest|ListRequest $request
@@ -46,7 +41,7 @@ class DatatableBuilder
         return $this->request->boolean('all')
             ? $this->builder->get()
             : $this->builder
-                ->{$this->getPaginatorMethodName()}($this->request->{getConfigNames('params.page_length')} ?? $this->pageLength)
+                ->{$this->getPaginatorMethodName()}($this->getPageLength())
                 ->withQueryString();
     }
 
@@ -59,7 +54,7 @@ class DatatableBuilder
     public function search(): static
     {
         $q = $this->request->{getConfigNames('params.search')};
-        $searchable = $this->request->{getConfigNames('params.searchable_columns')} ?? $this->searchable;
+        $searchable = $this->getSearchable();
         if ($this->request->filled(getConfigNames('params.search'))) {
             $this->builder = $this->builder->where(function (Builder $s) use ($q, $searchable) {
                 foreach ($searchable ?? [] as $item) {
@@ -88,11 +83,11 @@ class DatatableBuilder
     {
         if ($this->request->filled(getConfigNames('params.sort') . ".column")) {
             $sort = $this->request->{getConfigNames('params.sort')};
-            $this->builder = $this->builder->orderBy($sort['column'] ?? $this->builder->getModel()->getKeyName(), $sort['dir'] ?? $this->order);
+            $this->builder = $this->builder->orderBy($sort['column'] ?? $this->builder->getModel()->getKeyName(), $sort['dir'] ?? $this->getOrder());
         } elseif (Schema::hasColumn($this->builder->getModel()->getTable(), getConfigNames('order_column'))) {
             $this->builder = $this->builder->orderBy(getConfigNames('order_column'));
         } else
-            $this->builder = $this->builder->orderBy($this->builder->getModel()->getKeyName(), $this->order);
+            $this->builder = $this->builder->orderBy($this->builder->getModel()->getKeyName(), $this->getOrder());
 
         return $this;
     }
@@ -113,7 +108,7 @@ class DatatableBuilder
      */
     public function setPageLength(?int $pageLength): DatatableBuilder
     {
-        $this->pageLength = $pageLength ?? $this->pageLength;
+        $this->pageLength = $pageLength;
         return $this;
     }
 
@@ -123,7 +118,7 @@ class DatatableBuilder
      */
     public function setSearchable(?array $searchable): DatatableBuilder
     {
-        $this->searchable = $searchable ?? $this->searchable;
+        $this->searchable = $searchable;
         return $this;
     }
 
@@ -133,15 +128,15 @@ class DatatableBuilder
      */
     public function setFields(?array $fields): DatatableBuilder
     {
-        $this->fields = $fields ?? ['*'];
+        $this->fields = $fields;
         return $this;
     }
 
     /**
-     * @param string $order
+     * @param string|null $order
      * @return DatatableBuilder
      */
-    public function setOrder(string $order): DatatableBuilder
+    public function setOrder(?string $order): DatatableBuilder
     {
         $this->order = $order;
         return $this;
@@ -152,7 +147,7 @@ class DatatableBuilder
      */
     public function getFields(): array
     {
-        return $this->fields;
+        return $this->fields ?? ['*'];
     }
 
     /**
@@ -160,7 +155,7 @@ class DatatableBuilder
      */
     public function getPageLength(): int
     {
-        return $this->pageLength;
+        return $this->request->{getConfigNames('params.page_length')} ?? $this->pageLength ?? getConfigNames('default_page_length');
     }
 
     /**
@@ -168,7 +163,7 @@ class DatatableBuilder
      */
     public function getSearchable(): mixed
     {
-        return $this->searchable;
+        return $this->request->{getConfigNames('params.searchable_columns')} ?? $this->searchable ?? getConfigNames('search.default_searchable');
     }
 
     /**
@@ -176,7 +171,7 @@ class DatatableBuilder
      */
     public function getOrder(): string
     {
-        return $this->order;
+        return $this->order ?? 'desc';
     }
 
     /**
@@ -184,7 +179,7 @@ class DatatableBuilder
      */
     public function getPaginator(): string
     {
-        return $this->paginator ?? 'full';
+        return $this->paginator ?? 'default';
     }
 
     private function getPaginatorMethodName(): string
@@ -197,10 +192,10 @@ class DatatableBuilder
     }
 
     /**
-     * @param string $paginator
+     * @param string|null $paginator
      * @return DatatableBuilder
      */
-    public function setPaginator(string $paginator = 'full'): DatatableBuilder
+    public function setPaginator(?string $paginator = 'default'): DatatableBuilder
     {
         $this->paginator = $paginator;
         return $this;

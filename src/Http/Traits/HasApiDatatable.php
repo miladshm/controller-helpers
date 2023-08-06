@@ -45,15 +45,15 @@ trait HasApiDatatable
     /**
      * @return string|null
      */
-    public function getPaginator(): ?string
+    protected function getPaginator(): ?string
     {
-        return self::$paginator;
+        return self::$paginator ?? getConfigNames('default_pagination_type');
     }
 
     /**
      * @param string|null $paginator
      */
-    public function setPaginator(?string $paginator): void
+    protected function setPaginator(?string $paginator): void
     {
         self::$paginator = $paginator;
     }
@@ -68,11 +68,12 @@ trait HasApiDatatable
     public function index(ListRequest $request, DatatableBuilder $datatable): JsonResponse
     {
         $items = $datatable
+            ->setRequest($request)
             ->setBuilder($this->getItems())
             ->setSearchable($this->getSearchable())
             ->setPageLength($this->getPageLength())
             ->setPaginator($this->getPaginator())
-            ->setRequest($request)
+            ->setFields($this->getColumns())
             ->setOrder($this->getOrder())
             ->search()
             ->sortResult()
