@@ -23,6 +23,9 @@ trait HasGetCount
 
             $count = DB::table($this->model()->getTable())
                 ->select($group_by, DB::raw('count(*) as count'))
+                ->when(true, function ($builder) {
+                    return $this->filters($builder);
+                })
                 ->groupBy($group_by)
                 ->get();
         } else
