@@ -20,14 +20,14 @@ trait HasGetCount
     public function getCount(?string $group_by = null): JsonResponse
     {
         if (isset($group_by)) {
-
             $count = DB::table($this->model()->getTable())
                 ->select($group_by, DB::raw('count(*) as count'))
                 ->when(true, function ($builder) {
                     return $this->filters($builder);
                 })
                 ->groupBy($group_by)
-                ->get();
+                ->get()
+                ->pluck('count', $group_by);
         } else
             $count = $this->model()
                 ->query()
