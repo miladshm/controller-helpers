@@ -7,7 +7,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 
 trait WithFilters
 {
-    protected function filters(Builder|QueryBuilder $builder): null|Builder|QueryBuilder
+    protected function filters($builder): null|Builder|QueryBuilder
     {
         return null;
     }
