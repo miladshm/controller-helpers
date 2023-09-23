@@ -2,7 +2,6 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
@@ -31,7 +30,7 @@ trait HasGetCount
         } else
             $count = $this->model()
                 ->query()
-                ->when(true, function (Builder $builder) {
+                ->when(true, function ($builder) {
                     return $this->filters($builder);
                 })
                 ->count();
