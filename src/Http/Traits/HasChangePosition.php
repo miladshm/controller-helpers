@@ -17,7 +17,9 @@ trait HasChangePosition
 
         $operator = $request->input('action') === 'up' ? '<' : '>';
         $second_item =
-            $this->model()->newQuery()->where($this->getPositionColumn(), $operator, $item->{$this->getPositionColumn()})->first();
+            $this->model()->newQuery()
+                ->when(true, fn($q) => $this->filters($q))
+                ->where($this->getPositionColumn(), $operator, $item->{$this->getPositionColumn()})->first();
 
         $second_item_position = $second_item->{$this->getPositionColumn()};
         $item_position = $item->{$this->getPositionColumn()};
