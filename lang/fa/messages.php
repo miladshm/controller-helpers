@@ -15,6 +15,8 @@ return [
     'success_rate' => ['status' => 'امتیازدهی و اتمام کار با موفقیت انجام گردید.'],
     'not_exist' => ':attribute پیدا نشد!',
     'not_valid' => ':attribute معتبر نمی باشد!',
+    'cannot_lift_up' => 'نیست بالاتر از سیاهی رنگ!',
+    'cannot_get_down' => 'دیگه پایین از این نمی ره!',
 
 ];
 

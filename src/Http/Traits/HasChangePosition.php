@@ -2,6 +2,8 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Lang;
 use Miladshm\ControllerHelpers\Http\Requests\ChangePositionRequest;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Miladshm\ControllerHelpers\Traits\WithFilters;
@@ -13,7 +15,7 @@ trait HasChangePosition
 
     public function changePosition(ChangePositionRequest $request, int $id)
     {
-        $item = $this->model()->query()->find($id);
+        $item = $this->model()->query()->findOrFail($id);
 
         $operator = $request->input('action') === 'up' ? '<' : '>';
         $second_item =
@@ -21,7 +23,13 @@ trait HasChangePosition
                 ->when(true, fn($q) => $this->filters($q))
                 ->where($this->getPositionColumn(), $operator, $item->{$this->getPositionColumn()})
                 ->orderBy($this->getPositionColumn())
-                ->first();
+                ->firstOr(function () use ($request) {
+                    $message = $request->input('action') === 'up'
+                        ? Lang::get('responder::messages.cannot_lift_up')
+                        : Lang::get('responder::messages.cannot_get_down');
+
+                    throw new ModelNotFoundException($message);
+                });
 
         $second_item_position = $second_item->{$this->getPositionColumn()};
         $item_position = $item->{$this->getPositionColumn()};
