@@ -2,8 +2,8 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Lang;
+use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Http\Requests\ChangePositionRequest;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Miladshm\ControllerHelpers\Traits\WithFilters;
@@ -28,7 +28,7 @@ trait HasChangePosition
                         ? Lang::get('responder::messages.cannot_lift_up')
                         : Lang::get('responder::messages.cannot_get_down');
 
-                    throw new ModelNotFoundException($message);
+                    throw ValidationException::withMessages([$this->getPositionColumn() => $message]);
                 });
 
         $second_item_position = $second_item->{$this->getPositionColumn()};
