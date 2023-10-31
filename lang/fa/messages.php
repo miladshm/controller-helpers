@@ -2,6 +2,7 @@
 
 return [
     'success_status' => ['status' => "عملیات با موفقیت انجام گردید."],
+    'success_duplicate' => ['status' => "تکثیر با موفقیت انجام گردید."],
     'success_store' => ['status' => "آیتم با موفقیت ایجاد گردید."],
     'success_update' => ['status' => "ویرایش با موفقیت انجام گردید."],
     'success_change_status' => ['status' => "تغییر وضعیت با موفقیت انجام گردید."],
