@@ -18,11 +18,12 @@ trait HasChangePosition
         $item = $this->model()->query()->findOrFail($id);
 
         $operator = $request->input('action') === 'up' ? '<' : '>';
+        $order = $request->input('action') === 'up' ? 'desc' : 'asc';
         $second_item =
             $this->model()->newQuery()
                 ->when(true, fn($q) => $this->filters($q))
                 ->where($this->getPositionColumn(), $operator, $item->{$this->getPositionColumn()})
-                ->orderBy($this->getPositionColumn())
+                ->orderBy($this->getPositionColumn(), $order)
                 ->firstOr(function () use ($request) {
                     $message = $request->input('action') === 'up'
                         ? Lang::get('responder::messages.cannot_lift_up')
@@ -47,6 +48,6 @@ trait HasChangePosition
 
     protected function getPositionColumn()
     {
-        return 'position';
+        return getConfigNames('order_column');
     }
 }

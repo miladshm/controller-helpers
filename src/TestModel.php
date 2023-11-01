@@ -9,7 +9,7 @@ class TestModel extends \Illuminate\Database\Eloquent\Model
 {
     use HasFactory;
 
-    protected $fillable = ['code'];
+    protected $guarded = ['id'];
 
     protected $connection = 'testbench';
 

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Miladshm\ControllerHelpers\Http\Requests\StoreRequest;
 use Miladshm\ControllerHelpers\Http\Traits\HasApiDatatable;
+use Miladshm\ControllerHelpers\Http\Traits\HasChangePosition;
+use Miladshm\ControllerHelpers\Http\Traits\HasChangeStatus;
 use Miladshm\ControllerHelpers\Http\Traits\HasDestroy;
 use Miladshm\ControllerHelpers\Http\Traits\HasShow;
 use Miladshm\ControllerHelpers\Http\Traits\HasStore;
@@ -14,7 +16,7 @@ use Miladshm\ControllerHelpers\TestModel;
 
 class TestController extends Controller
 {
-    use HasStore, HasApiDatatable, HasUpdate, HasDestroy, HasShow;
+    use HasStore, HasApiDatatable, HasUpdate, HasDestroy, HasShow, HasChangePosition, HasChangeStatus;
 
     /**
      * @return Model

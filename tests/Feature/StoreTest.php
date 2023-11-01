@@ -11,13 +11,13 @@ class StoreTest extends \Miladshm\ControllerHelpers\Tests\TestCase
 
     public function test_data_store_json()
     {
-        $res = $this->postJson('/testing', ['code' => $uuid = fake()->uuid]);
+        $res = $this->postJson('/testing', ['code' => $uuid = fake()->uuid, 'order' => 1, 'status' => 1]);
 
         $res->assertSuccessful();
         $res->assertJsonStructure(getConfigNames('response.field_names'));
         $res->assertJsonIsObject(getConfigNames('response.field_names.data'));
         $res->assertSeeText(__('responder::messages.success_store.status'));
-        $this->assertDatabaseHas($table = (new TestModel)->getTable(), ['code' => $uuid]);
+        $this->assertDatabaseHas($table = (new TestModel)->getTable(), ['code' => $uuid, 'order' => 1, 'status' => 1]);
         $this->assertDatabaseCount($table, 51);
     }
 
@@ -32,11 +32,11 @@ class StoreTest extends \Miladshm\ControllerHelpers\Tests\TestCase
 
     public function test_data_store_redirect()
     {
-        $res = $this->post('/testing', ['code' => $uuid = fake()->uuid]);
+        $res = $this->post('/testing', ['code' => $uuid = fake()->uuid, 'order' => 1, 'status' => 1]);
 
         $res->assertRedirect();
         $res->assertSessionHasNoErrors();
-        $this->assertDatabaseHas($table = (new TestModel)->getTable(), ['code' => $uuid]);
+        $this->assertDatabaseHas($table = (new TestModel)->getTable(), ['code' => $uuid, 'order' => 1, 'status' => 1]);
         $this->assertDatabaseCount($table, 51);
     }
 
