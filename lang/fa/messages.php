@@ -18,6 +18,8 @@ return [
     'not_valid' => ':attribute معتبر نمی باشد!',
     'cannot_lift_up' => 'نیست بالاتر از سیاهی رنگ!',
     'cannot_get_down' => 'دیگه پایین از این نمی ره!',
+    'field_already_marked' => 'این فیلد قبلا نشانه دار شده است!',
+    'field_not_exists' => 'فیلد موردنظر در این جدول وجود ندارد!',
 
 ];
 
