@@ -29,7 +29,7 @@ trait HasMarkDate
         if (!Schema::connection($this->model()->getConnectionName())->hasColumn($this->model()->getTable(), $field))
             throw ValidationException::withMessages([$field => trans('responder::messages.field_not_exists')]);
 
-        if (!$item->{$field})
+        if ($item->{$field})
             throw ValidationException::withMessages([$field => trans('responder::messages.field_already_marked')]);
 
         $item->update([
