@@ -7,11 +7,12 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Http\Requests\MarkRequest;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
+use Miladshm\ControllerHelpers\Traits\WithFilters;
 use Miladshm\ControllerHelpers\Traits\WithModel;
 
 trait HasMarkDate
 {
-    use WithModel;
+    use WithModel, WithFilters;
 
 
     /**
@@ -22,7 +23,9 @@ trait HasMarkDate
      */
     public function mark(MarkRequest $request, int $id, ?string $mark_field = null): JsonResponse
     {
-        $item = $this->model()->query()->findOrFail($id);
+        $item = $this->model()->query()
+            ->when(true, fn($q) => $this->filters($q))
+            ->findOrFail($id);
 
         $field = $mark_field ?? $this->getMarkField();
 
