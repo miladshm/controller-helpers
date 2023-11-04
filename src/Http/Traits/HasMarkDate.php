@@ -36,7 +36,7 @@ trait HasMarkDate
             throw ValidationException::withMessages([$field => trans('responder::messages.field_already_marked')]);
 
         $item->update([
-            $field => $request->date('time')
+            $field => $request->date('time') ?? now()
         ]);
 
         return ResponderFacade::setData($item)->respond();
