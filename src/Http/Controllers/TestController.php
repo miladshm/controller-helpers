@@ -33,21 +33,4 @@ class TestController extends Controller
     {
         return new StoreRequest;
     }
-
-    /**
-     * @param Model|null $item
-     * @return array|null
-     */
-    private function extraData(Model $item = null): ?array
-    {
-        return [];
-    }
-
-    /**
-     * @return array
-     */
-    private function relations(): array
-    {
-        return [];
-    }
 }

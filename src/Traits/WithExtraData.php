@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 trait WithExtraData
 {
-    abstract private function extraData(Model $item = null): ?array;
+    protected function extraData(Model $item = null): ?array
+    {
+        return [];
+    }
 
 }
