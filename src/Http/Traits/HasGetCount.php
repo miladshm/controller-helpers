@@ -25,6 +25,7 @@ trait HasGetCount
                     return $this->filters($builder);
                 })
                 ->groupBy($group_by)
+                ->orderByDesc('count')
                 ->get()
                 ->pluck('count', $group_by);
         } else

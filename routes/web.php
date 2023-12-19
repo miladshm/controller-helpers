@@ -1,6 +1,10 @@
 <?php
 
 
-\Illuminate\Support\Facades\Route::apiResource('testing', \Miladshm\ControllerHelpers\Http\Controllers\TestController::class);
-\Illuminate\Support\Facades\Route::post('change-position/{id}', [\Miladshm\ControllerHelpers\Http\Controllers\TestController::class, 'changePosition']);
-\Illuminate\Support\Facades\Route::post('change-status/{id}', [\Miladshm\ControllerHelpers\Http\Controllers\TestController::class, 'changeStatus']);
+use Illuminate\Support\Facades\Route;
+use Miladshm\ControllerHelpers\Http\Controllers\TestController;
+
+Route::apiResource('testing', TestController::class);
+Route::post('change-position/{id}', [TestController::class, 'changePosition']);
+Route::post('change-status/{id}', [TestController::class, 'changeStatus']);
+Route::get('count/{group_by?}', [TestController::class, 'getCount']);
