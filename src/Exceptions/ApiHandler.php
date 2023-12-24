@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
-class Handler extends ExceptionHandler
+class ApiHandler extends ExceptionHandler
 {
     /**
      * A list of the exception types that are not reported.
