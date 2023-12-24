@@ -3,6 +3,7 @@
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Http\Requests\MarkRequest;
@@ -36,7 +37,7 @@ trait HasMarkDate
             throw ValidationException::withMessages([$field => trans('responder::messages.field_already_marked')]);
 
         $item->update([
-            $field => $request->date('time')
+            $field => $request->date('time') ?? now(Config::get('app.timezone'))->toDateTimeString()
         ]);
 
         return ResponderFacade::setData($item)->respond();
