@@ -65,7 +65,7 @@ trait HasUpdate
 
     protected function rules(): array
     {
-
+        return [];
     }
 
     protected function messages(): array

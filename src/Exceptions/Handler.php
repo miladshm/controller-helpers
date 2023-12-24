@@ -5,6 +5,7 @@ namespace Miladshm\ControllerHelpers\Exceptions;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Facades\App;
+use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -44,22 +45,21 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (NotFoundHttpException|ModelNotFoundException $e, $request) {
-            if ($request->is("api/*")) {
                 return ResponderFacade::respondNotFound();
-            }
+        });
+
+        $this->renderable(function (ValidationException $e, $request) {
+            return ResponderFacade::setMessage($e->getMessage())->setData($e->errors())->respondInvalid();
         });
 
         $this->renderable(function (HttpException $e, $request) {
-            if ($request->is("api/*")) {
                 return ResponderFacade::setHttpCode($e->getStatusCode())->setMessage($e->getMessage())->respond();
-            }
         });
 
         $this->renderable(function (\Exception $e, $request) {
-            if (App::environment('production'))
-                return ResponderFacade::setMessage('خطای سرور رخ داده لطفا با پشتیبانی تماس بگیرید')->respondError();
-            else
-                return ResponderFacade::setMessage($e->getMessage())->setData($e->getTrace())->respondError();
+            return App::environment('production')
+                ? ResponderFacade::setMessage('خطای سرور رخ داده لطفا با پشتیبانی تماس بگیرید')->respondError()
+                : ResponderFacade::setMessage($e->getMessage())->setData($e->getTrace())->respondError();
         });
     }
 

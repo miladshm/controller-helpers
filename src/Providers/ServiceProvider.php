@@ -8,7 +8,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     public function boot()
     {
         $this->loadTranslationsFrom(__DIR__ . "/../../lang", 'responder');
-
+        $this->loadJsonTranslationsFrom(__DIR__ . "/../../lang");
         $this->publishes([
             __DIR__ . "/../../config/controller-helpers.php" => config_path('controller-helpers.php')
         ], "controller-helpers-config");

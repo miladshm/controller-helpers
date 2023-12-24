@@ -139,4 +139,9 @@ class ResponseBuilder
         return $this;
     }
 
+    public function getCode(): int
+    {
+        return $this->code;
+    }
+
 }
