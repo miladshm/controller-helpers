@@ -63,10 +63,10 @@ class DatatableBuilder
                         $column = Str::after($item, '.');
                         if (method_exists($this->builder->getModel(), $rel))
                             $s->orWhereHas($rel, function ($s) use ($q, $column) {
-                                if (Schema::hasColumn($s->getModel()->getTable(), $column))
+                                if (Schema::connection($s->getModel()->getConnectionName())->hasColumn($s->getModel()->getTable(), $column))
                                     $s->where($column, 'LIKE', '%' . $q . '%');
                             });
-                    } elseif (Schema::hasColumn($this->builder->getModel()->getTable(), $item))
+                    } elseif (Schema::connection($this->builder->getModel()->getConnectionName())->hasColumn($this->builder->getModel()->getTable(), $item))
                         $s->orwhere($item, 'LIKE', '%' . $q . '%');
                 }
             });
