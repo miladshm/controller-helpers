@@ -2,8 +2,8 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Miladshm\ControllerHelpers\Traits\WithFilters;
 use Miladshm\ControllerHelpers\Traits\WithModel;
@@ -19,9 +19,10 @@ trait HasGetCount
     public function getCount(?string $group_by = null): JsonResponse
     {
         if (isset($group_by)) {
-            $count = DB::table($this->model()->getTable())
-                ->select($group_by, DB::raw('count(*) as count'))
-                ->when(true, function ($builder) {
+            $count = $this->model()->query()
+                ->select($group_by)
+                ->selectSub('count(*)', 'count')
+                ->when(true, function (Builder $builder) {
                     return $this->filters($builder);
                 })
                 ->groupBy($group_by)
