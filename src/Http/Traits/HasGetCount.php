@@ -27,7 +27,7 @@ trait HasGetCount
                 })
                 ->groupBy($group_by)
                 ->orderByDesc('count')
-                ->get()
+//                ->get()
                 ->pluck('count', $group_by);
         } else
             $count = $this->model()
