@@ -2,6 +2,7 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
@@ -30,15 +31,17 @@ trait HasUpdate
     public function update(Request $request, $id): RedirectResponse|JsonResponse
     {
         $requestClass = $this->updateRequestClass() ?? $this->requestClass();
-        $data = $this->setRules($requestClass->rules())->setMessages($requestClass->messages())->getValidationData($request);
 
-        $item = $this->model()->query()->findOrFail($id);
         DB::beginTransaction();
         try {
             $this->prepareForUpdate($request);
+            $data = $this->setRules($requestClass->rules())->setMessages($requestClass->messages())->getValidationData($request);
+            $item = $this->model()->query()->findOrFail($id);
             $item->update($data);
             $this->updateCallback($request, $item);
-        } catch (\Exception $exception) {
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Exception $exception) {
             DB::rollBack();
             return ResponderFacade::setMessage($exception->getMessage())->respondError();
         }
@@ -49,19 +52,14 @@ trait HasUpdate
 
     }
 
-    protected function prepareForUpdate(Request &$request)
-    {
-
-    }
-
-    protected function updateCallback(Request $request, Model $item)
-    {
-
-    }
-
     protected function updateRequestClass(): ?FormRequest
     {
         return null;
+    }
+
+    protected function prepareForUpdate(Request &$request)
+    {
+
     }
 
     protected function rules(): array
@@ -74,6 +72,11 @@ trait HasUpdate
         $requestClass = $this->updateRequestClass() ?? $this->requestClass();
 
         return $requestClass->messages();
+    }
+
+    protected function updateCallback(Request $request, Model $item)
+    {
+
     }
 
 }

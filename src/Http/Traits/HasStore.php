@@ -27,17 +27,18 @@ trait HasStore
      */
     public function store(Request $request): RedirectResponse|JsonResponse
     {
-        $data = $this
-            ->setRules($this->requestClass()->rules())
-            ->setMessages($this->requestClass()->messages())
-            ->getValidationData($request);
-
         DB::beginTransaction();
         try {
             $this->prepareForStore($request);
+            $data = $this
+                ->setRules($this->requestClass()->rules())
+                ->setMessages($this->requestClass()->messages())
+                ->getValidationData($request);
             $item = $this->model()->query()->create($data);
             $this->storeCallback($request, $item);
 
+        } catch (ValidationException $exception) {
+            throw $exception;
         } catch (\Exception $exception) {
             DB::rollBack();
             return ResponderFacade::setExceptionMessage($exception->getMessage())->respondError();
