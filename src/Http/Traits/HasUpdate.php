@@ -34,7 +34,7 @@ trait HasUpdate
 
         DB::beginTransaction();
         try {
-            $this->prepareForUpdate($request);
+            $request = $this->prepareForUpdate($request);
             $data = $this->setRules($requestClass->rules())->setMessages($requestClass->messages())->getValidationData($request);
             $item = $this->model()->query()->findOrFail($id);
             $item->update($data);
@@ -57,9 +57,9 @@ trait HasUpdate
         return null;
     }
 
-    protected function prepareForUpdate(Request &$request)
+    protected function prepareForUpdate(Request $request): Request
     {
-
+        return $request;
     }
 
     protected function rules(): array

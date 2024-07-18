@@ -29,7 +29,7 @@ trait HasStore
     {
         DB::beginTransaction();
         try {
-            $this->prepareForStore($request);
+            $request = $this->prepareForStore($request);
             $data = $this
                 ->setRules($this->requestClass()->rules())
                 ->setMessages($this->requestClass()->messages())
@@ -60,9 +60,9 @@ trait HasStore
 
     }
 
-    protected function prepareForStore(Request &$request)
+    protected function prepareForStore(Request $request): Request
     {
-
+        return $request;
     }
 
 
