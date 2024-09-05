@@ -106,16 +106,16 @@ class DatatableBuilder
                         if (method_exists($this->builder->getModel(), $rel))
                             $s->orWhereHas($rel, function (Builder $s) use ($q, $column) {
                                 if (Schema::connection($s->getModel()->getConnectionName())->hasColumn($s->getModel()->getTable(), $column))
-                                    $s->where(function (Builder $s) use ($column, $q) {
+//                                    $s->where(function (Builder $s) use ($column, $q) {
                                         foreach (explode(' ', $q) as $str)
-                                            $s->orWhere($column, 'LIKE', '%' . $str . '%');
-                                    });
+                                            $s->orWhere($column, 'LIKE', "%$str%");
+//                                    });
                             });
                     } elseif (Schema::connection($this->builder->getModel()->getConnectionName())->hasColumn($this->builder->getModel()->getTable(), $item)) {
-                        $s->where(function (Builder $s) use ($item, $q) {
+//                        $s->where(function (Builder $s) use ($item, $q) {
                             foreach (explode(' ', $q) as $str)
-                                $s->orWhere($item, 'LIKE', '%' . $str . '%');
-                        });
+                                $s->orWhere($item, 'LIKE', "%$str%");
+//                        });
                     }
                 }
             });
