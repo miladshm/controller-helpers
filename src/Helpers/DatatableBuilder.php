@@ -45,8 +45,50 @@ class DatatableBuilder
                 ->withQueryString();
     }
 
+    private function getPaginatorMethodName(): string
+    {
+        return match ($this->getPaginator()) {
+            default => 'paginate',
+            'simple' => 'simplePaginate',
+            'cursor' => 'cursorPaginate',
+        };
+    }
 
+    /**
+     * @return string
+     */
+    public function getPaginator(): string
+    {
+        return $this->paginator ?? 'default';
+    }
 
+    /**
+     * @param string|null $paginator
+     * @return DatatableBuilder
+     */
+    public function setPaginator(?string $paginator = 'default'): DatatableBuilder
+    {
+        $this->paginator = $paginator;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPageLength(): int
+    {
+        return $this->request->{getConfigNames('params.page_length')} ?? $this->pageLength ?? getConfigNames('default_page_length');
+    }
+
+    /**
+     * @param int|null $pageLength
+     * @return DatatableBuilder
+     */
+    public function setPageLength(?int $pageLength): DatatableBuilder
+    {
+        $this->pageLength = $pageLength;
+        return $this;
+    }
 
     /**
      * @return $this
@@ -62,18 +104,43 @@ class DatatableBuilder
                         $rel = Str::before($item, '.');
                         $column = Str::after($item, '.');
                         if (method_exists($this->builder->getModel(), $rel))
-                            $s->orWhereHas($rel, function ($s) use ($q, $column) {
+                            $s->orWhereHas($rel, function (Builder $s) use ($q, $column) {
                                 if (Schema::connection($s->getModel()->getConnectionName())->hasColumn($s->getModel()->getTable(), $column))
-                                    $s->where($column, 'LIKE', '%' . $q . '%');
+                                    $s->where(function (Builder $s) use ($column, $q) {
+                                        foreach (explode(' ', $q) as $str)
+                                            $s->orWhere($column, 'LIKE', '%' . $str . '%');
+                                    });
                             });
-                    } elseif (Schema::connection($this->builder->getModel()->getConnectionName())->hasColumn($this->builder->getModel()->getTable(), $item))
-                        $s->orwhere($item, 'LIKE', '%' . $q . '%');
+                    } elseif (Schema::connection($this->builder->getModel()->getConnectionName())->hasColumn($this->builder->getModel()->getTable(), $item)) {
+                        $s->where(function (Builder $s) use ($item, $q) {
+                            foreach (explode(' ', $q) as $str)
+                                $s->orWhere($item, 'LIKE', '%' . $str . '%');
+                        });
+                    }
                 }
             });
         }
 
         return $this;
 
+    }
+
+    /**
+     * @return array|mixed|null
+     */
+    public function getSearchable(): mixed
+    {
+        return $this->request->{getConfigNames('params.searchable_columns')} ?? $this->searchable ?? getConfigNames('search.default_searchable');
+    }
+
+    /**
+     * @param array|string[]|null $searchable
+     * @return DatatableBuilder
+     */
+    public function setSearchable(?array $searchable): DatatableBuilder
+    {
+        $this->searchable = $searchable;
+        return $this;
     }
 
     /**
@@ -93,43 +160,11 @@ class DatatableBuilder
     }
 
     /**
-     * @param Builder $builder
-     * @return DatatableBuilder
+     * @return string
      */
-    public function setBuilder(Builder $builder): static
+    public function getOrder(): string
     {
-        $this->builder = $builder;
-        return $this;
-    }
-
-    /**
-     * @param int|null $pageLength
-     * @return DatatableBuilder
-     */
-    public function setPageLength(?int $pageLength): DatatableBuilder
-    {
-        $this->pageLength = $pageLength;
-        return $this;
-    }
-
-    /**
-     * @param array|string[]|null $searchable
-     * @return DatatableBuilder
-     */
-    public function setSearchable(?array $searchable): DatatableBuilder
-    {
-        $this->searchable = $searchable;
-        return $this;
-    }
-
-    /**
-     * @param array|null $fields
-     * @return DatatableBuilder
-     */
-    public function setFields(?array $fields): DatatableBuilder
-    {
-        $this->fields = $fields;
-        return $this;
+        return $this->order ?? 'desc';
     }
 
     /**
@@ -143,6 +178,16 @@ class DatatableBuilder
     }
 
     /**
+     * @param Builder $builder
+     * @return DatatableBuilder
+     */
+    public function setBuilder(Builder $builder): static
+    {
+        $this->builder = $builder;
+        return $this;
+    }
+
+    /**
      * @return array|string[]
      */
     public function getFields(): array
@@ -151,53 +196,12 @@ class DatatableBuilder
     }
 
     /**
-     * @return int
-     */
-    public function getPageLength(): int
-    {
-        return $this->request->{getConfigNames('params.page_length')} ?? $this->pageLength ?? getConfigNames('default_page_length');
-    }
-
-    /**
-     * @return array|mixed|null
-     */
-    public function getSearchable(): mixed
-    {
-        return $this->request->{getConfigNames('params.searchable_columns')} ?? $this->searchable ?? getConfigNames('search.default_searchable');
-    }
-
-    /**
-     * @return string
-     */
-    public function getOrder(): string
-    {
-        return $this->order ?? 'desc';
-    }
-
-    /**
-     * @return string
-     */
-    public function getPaginator(): string
-    {
-        return $this->paginator ?? 'default';
-    }
-
-    private function getPaginatorMethodName(): string
-    {
-        return match ($this->getPaginator()) {
-            default => 'paginate',
-            'simple' => 'simplePaginate',
-            'cursor' => 'cursorPaginate',
-        };
-    }
-
-    /**
-     * @param string|null $paginator
+     * @param array|null $fields
      * @return DatatableBuilder
      */
-    public function setPaginator(?string $paginator = 'default'): DatatableBuilder
+    public function setFields(?array $fields): DatatableBuilder
     {
-        $this->paginator = $paginator;
+        $this->fields = $fields;
         return $this;
     }
 }

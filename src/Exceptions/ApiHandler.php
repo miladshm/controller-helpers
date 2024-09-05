@@ -4,9 +4,11 @@ namespace Miladshm\ControllerHelpers\Exceptions;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\App;
 use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
+use SebastianBergmann\Invoker\TimeoutException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
@@ -50,6 +52,10 @@ class ApiHandler extends ExceptionHandler
 
         $this->renderable(function (ValidationException $e, $request) {
             return ResponderFacade::setMessage($e->getMessage())->setData($e->errors())->respondInvalid();
+        });
+
+        $this->renderable(function (ConnectionException|TimeoutException $e, $request) {
+            return ResponderFacade::respondUnavailable();
         });
 
         $this->renderable(function (HttpException $e, $request) {
