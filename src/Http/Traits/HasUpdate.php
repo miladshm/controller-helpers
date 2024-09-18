@@ -17,6 +17,7 @@ use Miladshm\ControllerHelpers\Traits\WithModel;
 use Miladshm\ControllerHelpers\Traits\WithRelations;
 use Miladshm\ControllerHelpers\Traits\WithRequestClass;
 use Miladshm\ControllerHelpers\Traits\WithValidation;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 trait HasUpdate
 {
@@ -39,7 +40,7 @@ trait HasUpdate
             $item = $this->model()->query()->findOrFail($id);
             $item->update($data);
             $this->updateCallback($request, $item);
-        } catch (ValidationException $exception) {
+        } catch (ValidationException|HttpException $exception) {
             throw $exception;
         } catch (Exception $exception) {
             DB::rollBack();

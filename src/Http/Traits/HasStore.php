@@ -15,6 +15,7 @@ use Miladshm\ControllerHelpers\Traits\WithModel;
 use Miladshm\ControllerHelpers\Traits\WithRelations;
 use Miladshm\ControllerHelpers\Traits\WithRequestClass;
 use Miladshm\ControllerHelpers\Traits\WithValidation;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 trait HasStore
 {
@@ -37,7 +38,7 @@ trait HasStore
             $item = $this->model()->query()->create($data);
             $this->storeCallback($request, $item);
 
-        } catch (ValidationException $exception) {
+        } catch (ValidationException|HttpException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
             DB::rollBack();
