@@ -101,9 +101,9 @@ class DatatableBuilder
             $this->builder = $this->builder->where(function (Builder $s) use ($q, $searchable) {
                 foreach ($searchable ?? [] as $item) {
                     if (Str::contains($item, '.')) {
-                        $rel = Str::before($item, '.');
-                        $column = Str::after($item, '.');
-                        if (method_exists($this->builder->getModel(), $rel))
+                        $rel = Str::beforeLast($item, '.');
+                        $column = Str::afterLast($item, '.');
+                        if (method_exists($this->builder->getModel(), Str::before($rel, '.')))
                             $s->orWhereHas($rel, function (Builder $s) use ($q, $column) {
                                 if (Schema::connection($s->getModel()->getConnectionName())->hasColumn($s->getModel()->getTable(), $column))
 //                                    $s->where(function (Builder $s) use ($column, $q) {
