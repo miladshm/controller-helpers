@@ -13,6 +13,8 @@ use Miladshm\ControllerHelpers\Http\Requests\ListRequest;
 
 class DatatableBuilder
 {
+    use Conditionable;
+
     public Builder $builder;
     private ListRequest|FormRequest $request;
     private ?array $fields;

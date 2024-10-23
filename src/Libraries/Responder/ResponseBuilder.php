@@ -6,9 +6,11 @@ use ArrayAccess;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Traits\Conditionable;
 
 class ResponseBuilder
 {
+    use Conditionable;
     private ?string $message = null;
     private ?string $exception_message = null;
     private ?int $http_code = null;
