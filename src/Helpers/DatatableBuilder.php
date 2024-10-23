@@ -9,6 +9,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Support\Traits\Conditionable;
 use Miladshm\ControllerHelpers\Http\Requests\ListRequest;
 
 class DatatableBuilder
