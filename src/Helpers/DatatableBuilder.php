@@ -4,9 +4,9 @@ namespace Miladshm\ControllerHelpers\Helpers;
 
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Pagination\CursorPaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Miladshm\ControllerHelpers\Http\Requests\ListRequest;
@@ -39,10 +39,18 @@ class DatatableBuilder
     {
         $this->builder = $this->builder->select($this->fields);
         return $this->request->boolean('all')
-            ? $this->builder->get()
+            ? $this->getAll()
             : $this->builder
                 ->{$this->getPaginatorMethodName()}($this->getPageLength())
                 ->withQueryString();
+    }
+
+    private function getAll(): Collection
+    {
+        if (!getConfigNames('get_all_wrapping.enabled')) return $this->builder->get();
+        $wrapper = getConfigNames('get_all_wrapping.wrapper');
+        ${$wrapper} = $this->builder->get();
+        return collect(compact("{$wrapper}"));
     }
 
     private function getPaginatorMethodName(): string

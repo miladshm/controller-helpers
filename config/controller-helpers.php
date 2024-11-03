@@ -7,6 +7,10 @@ return [
             'message' => 'message'
         ]
     ],
+    'get_all_wrapping' => [
+        'enabled' => false,
+        'wrapper' => 'data'
+    ],
     'params' => [
         'page_length' => 'page_length',
         'search' => 'q',
