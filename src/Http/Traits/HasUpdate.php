@@ -4,7 +4,6 @@ namespace Miladshm\ControllerHelpers\Http\Traits;
 
 use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,14 +13,12 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Miladshm\ControllerHelpers\Traits\WithModel;
-use Miladshm\ControllerHelpers\Traits\WithRelations;
-use Miladshm\ControllerHelpers\Traits\WithRequestClass;
 use Miladshm\ControllerHelpers\Traits\WithValidation;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 trait HasUpdate
 {
-    use WithModel, WithValidation, WithRequestClass, WithRelations;
+    use WithModel, WithValidation;
 
     /**
      * @param Request $request
@@ -31,12 +28,10 @@ trait HasUpdate
      */
     public function update(Request $request, $id): RedirectResponse|JsonResponse
     {
-        $requestClass = $this->updateRequestClass() ?? $this->requestClass();
-
         DB::beginTransaction();
         try {
             $this->prepareForUpdate($request);
-            $data = $this->setRules($requestClass->rules())->setMessages($requestClass->messages())->getValidationData($request);
+            $data = $this->getValidationData($request);
             $item = $this->model()->query()->findOrFail($id);
             $item->update($data);
             $this->updateCallback($request, $item);
@@ -51,11 +46,6 @@ trait HasUpdate
             return ResponderFacade::setData($item->load($this->relations())->toArray())->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
         return Redirect::back()->with(Lang::get('responder::messages.success_update'));
 
-    }
-
-    protected function updateRequestClass(): ?FormRequest
-    {
-        return null;
     }
 
     protected function prepareForUpdate(Request &$request)

@@ -7,13 +7,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
-use Miladshm\ControllerHelpers\Traits\WithFilters;
 use Miladshm\ControllerHelpers\Traits\WithModel;
 use Miladshm\ControllerHelpers\Traits\WithValidation;
 
 trait HasGetSum
 {
-    use WithModel, WithFilters, WithValidation;
+    use WithModel, WithValidation;
 
     /**
      * @param string $column

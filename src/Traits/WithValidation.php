@@ -9,8 +9,9 @@ use Miladshm\ControllerHelpers\Exceptions\ApiValidationException;
 
 trait WithValidation
 {
+    use WithRequestClass;
 
-    private array $rules;
+    private ?array $rules;
     private ?array $messages;
 
     /**
@@ -18,7 +19,7 @@ trait WithValidation
      */
     public function getRules(): array
     {
-        return $this->rules;
+        return $this->rules ?? $this->getRequestClass()->rules();
     }
 
     /**
@@ -32,11 +33,11 @@ trait WithValidation
     }
 
     /**
-     * @return array|null
+     * @return array
      */
     public function getMessages(): array
     {
-        return $this->messages ?? [];
+        return $this->messages ?? $this->getRequestClass()->messages();
     }
 
     /**

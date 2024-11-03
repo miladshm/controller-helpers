@@ -8,13 +8,11 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\View\View;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Miladshm\ControllerHelpers\Traits\WithExtraData;
-use Miladshm\ControllerHelpers\Traits\WithFilters;
 use Miladshm\ControllerHelpers\Traits\WithModel;
-use Miladshm\ControllerHelpers\Traits\WithRelations;
 
 trait HasIndex
 {
-    use WithFilters, WithModel, WithExtraData, WithRelations;
+    use WithModel, WithExtraData;
 
     abstract private function indexView(): View;
 

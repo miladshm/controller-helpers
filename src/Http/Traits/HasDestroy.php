@@ -2,9 +2,7 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Lang;
@@ -25,11 +23,7 @@ trait HasDestroy
      */
     public function destroy($id): JsonResponse|RedirectResponse
     {
-        $item = $this->model()->query()
-            ->when(in_array(SoftDeletes::class, class_uses($this->model()) ?? []), function (Builder $q) {
-                $q->withTrashed();
-            })
-            ->findOrFail($id);
+        $item = $this->getItem($id, true);
 
         $this->prepareForDestroy($item);
 

@@ -7,13 +7,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
-use Miladshm\ControllerHelpers\Traits\WithFilters;
 use Miladshm\ControllerHelpers\Traits\WithModel;
 use Miladshm\ControllerHelpers\Traits\WithValidation;
 
 trait HasGetColumn
 {
-    use WithModel, WithFilters, WithValidation;
+    use WithModel, WithValidation;
 
     /**
      * @param Request $request

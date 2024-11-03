@@ -12,14 +12,12 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Miladshm\ControllerHelpers\Traits\WithModel;
-use Miladshm\ControllerHelpers\Traits\WithRelations;
-use Miladshm\ControllerHelpers\Traits\WithRequestClass;
 use Miladshm\ControllerHelpers\Traits\WithValidation;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 trait HasStore
 {
-    use WithModel, WithValidation, WithRequestClass, WithRelations;
+    use WithModel, WithValidation;
 
     /**
      * @param Request $request
@@ -31,10 +29,7 @@ trait HasStore
         DB::beginTransaction();
         try {
             $this->prepareForStore($request);
-            $data = $this
-                ->setRules($this->requestClass()->rules())
-                ->setMessages($this->requestClass()->messages())
-                ->getValidationData($request);
+            $data = $this->getValidationData($request);
             $item = $this->model()->query()->create($data);
             $this->storeCallback($request, $item);
 

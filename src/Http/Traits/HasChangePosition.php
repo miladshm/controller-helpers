@@ -6,12 +6,11 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Http\Requests\ChangePositionRequest;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
-use Miladshm\ControllerHelpers\Traits\WithFilters;
 use Miladshm\ControllerHelpers\Traits\WithModel;
 
 trait HasChangePosition
 {
-    use WithModel, WithFilters;
+    use WithModel;
 
     public function changePosition(ChangePositionRequest $request, int $id)
     {

@@ -8,12 +8,11 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Http\Requests\MarkRequest;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
-use Miladshm\ControllerHelpers\Traits\WithFilters;
 use Miladshm\ControllerHelpers\Traits\WithModel;
 
 trait HasMarkDate
 {
-    use WithModel, WithFilters;
+    use WithModel;
 
 
     /**

@@ -2,20 +2,17 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Request;
 use Miladshm\ControllerHelpers\Helpers\DatatableBuilder;
 use Miladshm\ControllerHelpers\Http\Requests\ListRequest;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Miladshm\ControllerHelpers\Traits\WithExtraData;
-use Miladshm\ControllerHelpers\Traits\WithFilters;
 use Miladshm\ControllerHelpers\Traits\WithModel;
-use Miladshm\ControllerHelpers\Traits\WithRelations;
 
 trait HasApiDatatable
 {
-    use WithExtraData, WithRelations, WithModel, WithFilters;
+    use WithExtraData, WithModel;
 
     /**
      * @var string|null
@@ -88,18 +85,6 @@ trait HasApiDatatable
     protected function setPageLength(int $pageLength): void
     {
         static::$pageLength = $pageLength;
-    }
-
-    private function getItems(): Builder
-    {
-        return $this->model()->query()
-            ->select($this->getColumns())
-            ->when(count($this->relations()), function ($q) {
-                $q->with($this->relations());
-            })
-            ->when(true, function (Builder $builder) {
-                return $this->filters($builder);
-            });
     }
 
     /**

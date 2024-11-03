@@ -4,16 +4,15 @@ namespace Miladshm\ControllerHelpers\Http\Traits;
 
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Miladshm\ControllerHelpers\Traits\WithModel;
-use Miladshm\ControllerHelpers\Traits\WithRelations;
 
 trait HasShow
 {
-    use WithModel, WithRelations;
+    use WithModel;
 
 
     public function show($id)
     {
-        $item = $this->getModel($id);
+        $item = $this->getItem($id);
 
         return ResponderFacade::setData($item->toArray())->respond();
     }

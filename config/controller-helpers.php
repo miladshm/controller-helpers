@@ -26,6 +26,10 @@ return [
     'sort_direction' => 'desc', // acceptable values would be [asc,desc]
     'order_column' => 'order',
     'default_page_length' => 15,
-    'default_pagination_type' => 'default' // value can be [default,simple,cursor]
+    'default_pagination_type' => 'default', // value can be [default,simple,cursor]
+    'resources' => [
+        'enabled' => false,
+        'path' => app_path("Http/Resources"),
+    ],
 
 ];
