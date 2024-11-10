@@ -20,9 +20,11 @@ trait HasStore
     use WithModel, WithValidation;
 
     /**
-     * @param Request $request
-     * @return RedirectResponse|JsonResponse
-     * @throws ValidationException
+     * Handles the creation of a new model instance.
+     *
+     * @param Request $request The incoming request.
+     * @return RedirectResponse|JsonResponse The response to be sent back to the client.
+     * @throws ValidationException If the request data fails validation.
      */
     public function store(Request $request): RedirectResponse|JsonResponse
     {
@@ -52,8 +54,10 @@ trait HasStore
 
 
     /**
-     * @param Request $request
-     * @param Model $item
+     * A callback method that can be overridden to perform additional actions after a new model instance is created.
+     *
+     * @param Request $request The incoming request.
+     * @param Model $item The newly created model instance.
      * @return void
      */
     protected function storeCallback(Request $request, Model $item): void
@@ -61,6 +65,14 @@ trait HasStore
 
     }
 
+    /**
+     * A method that can be overridden to perform any necessary preparations before a new model instance is created.
+     * This method also allows you to modify the request object before it is validated.
+     * And you can implement the authorization logic here.
+     *
+     * @param Request $request The incoming request.
+     * @return void
+     */
     protected function prepareForStore(Request &$request)
     {
 

@@ -17,26 +17,47 @@ trait HasDestroy
 
 
     /**
-     * @param $id
-     * @return JsonResponse|RedirectResponse
-     * @throws \Throwable
+     * Deletes a record from the database.
+     *
+     * This function handles both soft-deleted and hard-deleted records.
+     * If the record is soft-deleted, it will be permanently deleted using the `forceDelete` method.
+     * If the record is not soft-deleted, it will be deleted using the `deleteOrFail` method.
+     *
+     * @param mixed $id The ID of the record to be deleted.
+     * @return JsonResponse|RedirectResponse Returns a JSON response if the request expects JSON,
+     *                                  otherwise, it returns a redirect response.
+     * @throws \Throwable Throws an exception if the record cannot be deleted.
      */
     public function destroy($id): JsonResponse|RedirectResponse
     {
+        // Retrieve the item from the database, even if it is soft-deleted.
         $item = $this->getItem($id, true);
 
+        // Perform any necessary actions before deleting a record.
+        // This method can be overridden in child classes to add custom logic before deleting a record.
         $this->prepareForDestroy($item);
 
+        // If the record is soft-deleted, it will be permanently deleted using the `forceDelete` method.
+        // If the record is not soft-deleted, it will be deleted using the `deleteOrFail` method.
         if ($item->deleted_at)
             $item->forceDelete();
         else
             $item->deleteOrFail();
 
+        // If the request expects JSON, return a JSON response.
+        // Otherwise, return a redirect response.
         if (Request::expectsJson())
             return ResponderFacade::setMessage(Lang::get('responder::messages.success_delete.status'))->respond();
         return Redirect::back()->with(Lang::get('responder::messages.success_delete'));
     }
 
+    /**
+     * Performs any necessary actions before deleting a record.
+     *
+     * This function can be overridden in child classes to add custom logic before deleting a record.
+     *
+     * @param Model $item The record to be deleted.
+     */
     protected function prepareForDestroy(Model $item): void
     {
 

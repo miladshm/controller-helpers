@@ -21,10 +21,12 @@ trait HasUpdate
     use WithModel, WithValidation;
 
     /**
-     * @param Request $request
-     * @param $id
-     * @return RedirectResponse|JsonResponse
-     * @throws ValidationException
+     * Updates a specific item in the database.
+     *
+     * @param Request $request The incoming request object.
+     * @param mixed $id The unique identifier of the item to be updated.
+     * @return RedirectResponse|JsonResponse The response to be sent back to the client.
+     * @throws ValidationException If the validation fails.
      */
     public function update(Request $request, $id): RedirectResponse|JsonResponse
     {
@@ -50,11 +52,20 @@ trait HasUpdate
             return ResponderFacade::setData($item->load($this->relations())->toArray())->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
         }
         return Redirect::back()->with(Lang::get('responder::messages.success_update'));
-
     }
 
-    protected function prepareForUpdate(Request &$request)
+    /**
+     * A method that can be overridden to perform any necessary preparations before updating a model instance.
+     * This method also allows you to modify the request object before it is validated.
+     * And you can implement the authorization logic here.
+     *
+     * @param Request $request The incoming request object.
+     * @return void
+     */
+    protected function prepareForUpdate(Request &$request): void
     {
+        // Implement any preparation logic needed before updating the model
+        // Modify the request object as necessary
     }
 
     protected function rules(): array
@@ -69,9 +80,16 @@ trait HasUpdate
         return $requestClass->messages();
     }
 
-    protected function updateCallback(Request $request, Model $item)
+    /**
+     * A callback method that can be overridden to perform additional actions after a model instance is updated.
+     * This method is called after the model has been updated.
+     *
+     * @param Request $request The incoming request object.
+     * @param Model $item The updated model instance.
+     * @return void
+     */
+    protected function updateCallback(Request $request, Model $item): void
     {
-
+        // Implement any additional logic needed after updating the model
     }
-
 }

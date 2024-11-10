@@ -2,15 +2,26 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
+use Illuminate\Http\JsonResponse;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Miladshm\ControllerHelpers\Traits\WithModel;
 
+/**
+ * Trait HasShow provides a show method for retrieving a single item from the database.
+ *
+ * @package Miladshm\ControllerHelpers\Http\Traits
+ */
 trait HasShow
 {
     use WithModel;
 
-
-    public function show($id)
+    /**
+     * Display the specified resource.
+     *
+     * @param int|string $id The unique identifier of the item to be displayed.
+     * @return JsonResponse The response containing the item data.
+     */
+    public function show(int|string $id)
     {
         $item = $this->getItem($id);
 
@@ -19,13 +30,5 @@ trait HasShow
             return ResponderFacade::setData(forward_static_call([$resource, 'make'], $item)->toArray(request()))->respond();
         }
         return ResponderFacade::setData($item->toArray())->respond();
-    }
-
-    private function getModel($id)
-    {
-        return $this->model()->query()
-            ->when(count($this->relations()), function ($q) {
-                $q->with($this->relations());
-            })->findOrFail($id);
     }
 }

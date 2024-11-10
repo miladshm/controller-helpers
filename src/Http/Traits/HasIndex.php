@@ -2,7 +2,6 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Request;
 use Illuminate\View\View;
@@ -17,36 +16,27 @@ trait HasIndex
     abstract private function indexView(): View;
 
     /**
-     * @return View|JsonResponse
+     * Retrieves and returns items either as a JSON response or a view.
+     *
+     * @return View|JsonResponse The response containing the items and extra data.
      */
     public function index(): View|JsonResponse
     {
-        $items = $this->getItems()->get();
+        // Fetch items using the query builder
+        $items = $this->query()->get();
+
+        // Check if the request expects a JSON response
         if (Request::expectsJson()) {
+            // If an API resource is available, transform items using it
             if ($this->getApiResource()) {
                 $resource = get_class($this->getApiResource());
                 $items = forward_static_call([$resource, 'collection'], $items)->toArray(\request());
             }
+            // Return a JSON response with items and extra data
             return ResponderFacade::setData(compact('items') + $this->extraData())->respond();
         }
+
+        // Return a view with items and extra data
         return $this->indexView()->with(compact('items') + $this->extraData());
-    }
-
-
-    private function getItems(): Builder
-    {
-        return $this->model()->query()
-            ->select($this->setColumns())
-            ->when(count($this->relations()), function ($q){
-                $q->with($this->relations());
-            })
-            ->when(true, function (Builder $builder){
-                return $this->filters($builder);
-            });
-    }
-
-    protected function setColumns() : array
-    {
-        return ['*'];
     }
 }

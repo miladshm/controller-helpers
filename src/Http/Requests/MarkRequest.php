@@ -9,6 +9,7 @@ class MarkRequest extends ApiFormRequest
     {
         return [
             'time' => ['date'],
+            'field' => ['string']
         ];
     }
 

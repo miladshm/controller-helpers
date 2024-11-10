@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Facade;
 use Miladshm\ControllerHelpers\Libraries\Responder\ResponseBuilder;
 
 /**
+ * A facade for the ResponseBuilder class, providing a convenient way to create and send HTTP responses.
+ *
  * @method static JsonResponse respond()
  * @method static JsonResponse respondError()
  * @method static JsonResponse respondNotFound()

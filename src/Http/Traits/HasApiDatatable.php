@@ -34,13 +34,11 @@ trait HasApiDatatable
      */
     private static array $searchable = [];
 
-    /**
-     * @var array|string[]
-     */
-    private static array $columns = ['*'];
 
     /**
-     * @return string|null
+     * Get the paginator type.
+     *
+     * @return string|null The paginator type or null if not set.
      */
     protected function getPaginator(): ?string
     {
@@ -48,7 +46,10 @@ trait HasApiDatatable
     }
 
     /**
-     * @param string|null $paginator
+     * Set the paginator type.
+     *
+     * @param string|null $paginator The paginator type to set.
+     * @return void
      */
     protected function setPaginator(?string $paginator): void
     {
@@ -58,41 +59,51 @@ trait HasApiDatatable
     /**
      * Display a listing of the resource.
      *
-     * @param ListRequest $request
-     * @param DatatableBuilder $datatable
-     * @return JsonResponse
+     * This method handles the index action for API requests. It processes the request,
+     * applies filters, sorting, and pagination to retrieve a list of items.
+     *
+     * @param ListRequest $request The incoming list request containing query parameters.
+     * @param DatatableBuilder $datatable The datatable builder instance for constructing the query.
+     * @return JsonResponse A JSON response containing the paginated items, applied filters, and any extra data.
      */
     public function index(ListRequest $request, DatatableBuilder $datatable): JsonResponse
     {
         $items = $datatable
-            ->setRequest($request)
-            ->setBuilder($this->getItems())
-            ->setSearchable($this->getSearchable())
-            ->setPageLength($this->getPageLength())
-            ->setPaginator($this->getPaginator())
-            ->setFields($this->getColumns())
-            ->setOrder($this->getOrder())
-            ->search()
-            ->sortResult()
-            ->paginate();
+            ->setRequest($request) // Set the request for the builder
+            ->setBuilder($this->query()) // Set the builder to the getItems method
+            ->setSearchable($this->getSearchable()) // Set the searchable fields
+            ->setPageLength($this->getPageLength()) // Set the page length for pagination
+            ->setPaginator($this->getPaginator()) // Set the paginator type
+            ->setFields($this->getColumns()) // Set the fields to retrieve
+            ->setOrder($this->getOrder()) // Set the order direction
+            ->search() // Apply search filters
+            ->sortResult() // Apply sorting
+            ->paginate(); // Paginate the results
 
-        $filters = Request::query();
-        $resource = $this->getApiResource();
-        $items = $resource?->collection($items)->toResponse($request)->getData() ?? $items;
+        $filters = Request::query(); // Get the applied filters
+        $resource = $this->getApiResource(); // Get the API resource instance
+        $items = $resource?->collection($items)->toResponse($request)->getData() ?? $items; // Transform the items using the API resource
 
-        $data = compact('items', 'filters') + $this->extraData();
+        $data = compact('items', 'filters') + $this->extraData(); // Get any extra data
 
-        return ResponderFacade::setData($data)->respond();
+        return ResponderFacade::setData($data)->respond(); // Return the JSON response
     }
 
+    /**
+     * Set the page length for pagination.
+     *
+     * @param int $pageLength The number of items per page.
+     * @return void
+     */
     protected function setPageLength(int $pageLength): void
     {
         static::$pageLength = $pageLength;
     }
 
     /**
-     * Order can be either 'asc' or 'desc', default value in 'desc'
-     * @return string
+     * Get the order direction for sorting.
+     *
+     * @return string The order direction ('asc' or 'desc').
      */
     protected function getOrder(): string
     {
@@ -100,7 +111,9 @@ trait HasApiDatatable
     }
 
     /**
-     * @return int
+     * Get the page length for pagination.
+     *
+     * @return int The number of items per page.
      */
     protected function getPageLength(): int
     {
@@ -108,19 +121,13 @@ trait HasApiDatatable
     }
 
     /**
-     * @return array
+     * Get the searchable fields.
+     *
+     * @return array An array of searchable field names.
      */
     protected function getSearchable(): array
     {
         return static::$searchable ?? getConfigNames('search.default_searchable');
-    }
-
-    /**
-     * @return array|string[]
-     */
-    public function getColumns(): array
-    {
-        return static::$columns;
     }
 }
 
