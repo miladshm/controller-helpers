@@ -1,4 +1,4 @@
-name: run-tests
+name: Tests
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  run-tests:
+  Tests:
     name: Run Unit and Feature Tests with PHP 8.1
     runs-on: ubuntu-latest
 

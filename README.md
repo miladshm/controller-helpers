@@ -2,6 +2,7 @@
 ## Overview
 This package is a set of helper traits for Laravel controllers. It provides a convenient and reusable way to handle common tasks such as API datatable, data storage, and data update and other crud operations in Laravel applications.
 
+![Tests Workflow](https://github.com/miladshm/controller-helpers/actions/workflows/tests.yml/badge.svg)
 ## Install
 
 ```shell
