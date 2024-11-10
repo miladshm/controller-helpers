@@ -4,6 +4,7 @@ namespace Miladshm\ControllerHelpers\Tests\Feature;
 
 
 use Illuminate\Support\Arr;
+use Miladshm\ControllerHelpers\Http\Controllers\TestController;
 use Miladshm\ControllerHelpers\Tests\TestCase;
 
 class ApiDatatableTest extends TestCase
@@ -27,7 +28,9 @@ class ApiDatatableTest extends TestCase
         $response->assertJsonStructure(getConfigNames('response.field_names'));
         $response->assertJsonIsObject(getConfigNames('response.field_names.data'));
         $response->assertSeeText(__('responder::messages.success_status.status'));
-        $response->assertJsonPath(getConfigNames('response.field_names.data') . ".items.per_page", $length);
+        $controller = new TestController;
+        $path = $controller->getApiResource() ? ".items.meta.per_page" : ".items.per_page";
+        $response->assertJsonPath(getConfigNames('response.field_names.data') . $path, $length);
     }
 
     public function test_datatable_response_default_page_length()
@@ -38,6 +41,8 @@ class ApiDatatableTest extends TestCase
         $response->assertJsonStructure(getConfigNames('response.field_names'));
         $response->assertJsonIsObject(getConfigNames('response.field_names.data'));
         $response->assertSeeText(__('responder::messages.success_status.status'));
-        $response->assertJsonPath(getConfigNames('response.field_names.data') . ".items.per_page", getConfigNames("default_page_length"));
+        $controller = new TestController;
+        $path = $controller->getApiResource() ? ".items.meta.per_page" : ".items.per_page";
+        $response->assertJsonPath(getConfigNames('response.field_names.data') . $path, getConfigNames("default_page_length"));
     }
 }

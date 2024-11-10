@@ -3,7 +3,6 @@
 namespace Miladshm\ControllerHelpers\Traits;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Facades\App;
 
 trait WithApiResource
@@ -24,19 +23,19 @@ trait WithApiResource
         return null;
     }
 
-    public function getApiCollection(): ?ResourceCollection
-    {
-        if (!getConfigNames('resources.enabled')) return null;
-
-        return is_string($this->getJsonCollectionClass()) ? App::make($this->getJsonCollectionClass()) : $this->getJsonCollectionClass();
-
-    }
-
-    /**
-     * @return JsonResource|class-string|null
-     */
-    public function getJsonCollectionClass(): ResourceCollection|string|null
-    {
-        return null;
-    }
+//    public function getApiCollection(): ?ResourceCollection
+//    {
+//        if (!getConfigNames('resources.enabled')) return null;
+//
+//        return is_string($this->getJsonCollectionClass()) ? App::make($this->getJsonCollectionClass()) : $this->getJsonCollectionClass();
+//
+//    }
+//
+//    /**
+//     * @return JsonResource|class-string|null
+//     */
+//    public function getJsonCollectionClass(): ResourceCollection|string|null
+//    {
+//        return null;
+//    }
 }

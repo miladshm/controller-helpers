@@ -30,9 +30,9 @@ trait HasUpdate
     {
         DB::beginTransaction();
         try {
+            $item = $this->getItem($id);
             $this->prepareForUpdate($request);
             $data = $this->getValidationData($request);
-            $item = $this->model()->query()->findOrFail($id);
             $item->update($data);
             $this->updateCallback($request, $item);
         } catch (ValidationException|HttpException $exception) {
@@ -45,7 +45,7 @@ trait HasUpdate
         if ($request->expectsJson()) {
             if ($this->getApiResource()) {
                 $resource = get_class($this->getApiResource());
-                return ResponderFacade::setData(forward_static_call([$resource, 'make'], $item)->toArray($request))->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
+                return ResponderFacade::setData(forward_static_call([$resource, 'make'], $item->load($this->relations()))->toArray($request))->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
             }
             return ResponderFacade::setData($item->load($this->relations())->toArray())->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
         }
