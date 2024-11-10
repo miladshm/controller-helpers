@@ -2,8 +2,8 @@
 
 namespace Miladshm\ControllerHelpers\Tests;
 
+use Miladshm\ControllerHelpers\Models\TestModel;
 use Miladshm\ControllerHelpers\Providers\TestServiceProvider;
-use Miladshm\ControllerHelpers\TestModel;
 
 class TestCase extends \Orchestra\Testbench\TestCase
 {

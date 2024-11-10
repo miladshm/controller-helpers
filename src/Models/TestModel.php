@@ -1,6 +1,6 @@
 <?php
 
-namespace Miladshm\ControllerHelpers;
+namespace Miladshm\ControllerHelpers\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Miladshm\ControllerHelpers\Factories\TestModelFactory;

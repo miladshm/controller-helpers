@@ -28,7 +28,7 @@ return [
     'default_page_length' => 15,
     'default_pagination_type' => 'default', // value can be [default,simple,cursor]
     'resources' => [
-        'enabled' => false,
+        'enabled' => true,
         'path' => app_path("Http/Resources"),
     ],
 

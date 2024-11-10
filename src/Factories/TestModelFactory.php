@@ -2,7 +2,7 @@
 
 namespace Miladshm\ControllerHelpers\Factories;
 
-use Miladshm\ControllerHelpers\TestModel;
+use Miladshm\ControllerHelpers\Models\TestModel;
 
 class TestModelFactory extends \Illuminate\Database\Eloquent\Factories\Factory
 {

@@ -14,6 +14,10 @@ trait HasShow
     {
         $item = $this->getItem($id);
 
+        if ($this->getApiResource()) {
+            $resource = get_class($this->getApiResource());
+            return ResponderFacade::setData(forward_static_call([$resource, 'make'], $item)->toArray(request()))->respond();
+        }
         return ResponderFacade::setData($item->toArray())->respond();
     }
 

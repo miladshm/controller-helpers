@@ -22,8 +22,13 @@ trait HasIndex
     public function index(): View|JsonResponse
     {
         $items = $this->getItems()->get();
-        if (Request::expectsJson())
+        if (Request::expectsJson()) {
+            if ($this->getApiResource()) {
+                $resource = get_class($this->getApiResource());
+                $items = forward_static_call([$resource, 'collection'], $items)->toArray(\request());
+            }
             return ResponderFacade::setData(compact('items') + $this->extraData())->respond();
+        }
         return $this->indexView()->with(compact('items') + $this->extraData());
     }
 

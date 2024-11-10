@@ -3,7 +3,7 @@
 namespace Miladshm\ControllerHelpers\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Miladshm\ControllerHelpers\TestModel;
+use Miladshm\ControllerHelpers\Models\TestModel;
 
 class DeleteTest extends \Miladshm\ControllerHelpers\Tests\TestCase
 {

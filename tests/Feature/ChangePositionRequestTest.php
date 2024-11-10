@@ -3,7 +3,7 @@
 namespace Miladshm\ControllerHelpers\Tests\Feature;
 
 
-use Miladshm\ControllerHelpers\TestModel;
+use Miladshm\ControllerHelpers\Models\TestModel;
 use Miladshm\ControllerHelpers\Tests\TestCase;
 
 class ChangePositionRequestTest extends TestCase

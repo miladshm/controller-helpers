@@ -77,6 +77,10 @@ trait HasApiDatatable
             ->paginate();
 
         $filters = Request::query();
+        if ($this->getApiCollection()) {
+            $resource = get_class($this->getApiCollection());
+            $items = forward_static_call([$resource, 'collection'], $items)->toArray($request);
+        }
         $data = compact('items', 'filters') + $this->extraData();
 
         return ResponderFacade::setData($data)->respond();

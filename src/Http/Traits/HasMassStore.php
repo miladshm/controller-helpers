@@ -45,8 +45,13 @@ trait HasMassStore
             return ResponderFacade::setExceptionMessage($exception->getMessage())->respondError();
         }
         DB::commit();
-        if ($request->expectsJson())
+        if ($request->expectsJson()) {
+            if ($this->getApiResource()) {
+                $resource = get_class($this->getApiResource());
+                return ResponderFacade::setData(forward_static_call([$resource, 'collection'], $items)->toArray($request))->setMessage(Lang::get('responder::messages.success_store.status'))->respond();
+            }
             return ResponderFacade::setData($items->toArray())->setMessage(Lang::get('responder::messages.success_store.status'))->respond();
+        }
         return Redirect::back()->with(Lang::get('responder::messages.success_status'));
     }
 
