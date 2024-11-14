@@ -24,16 +24,15 @@ trait HasUpdate
      * Updates a specific item in the database.
      *
      * @param Request $request The incoming request object.
-     * @param mixed $id The unique identifier of the item to be updated.
+     * @param int|string $id The unique identifier of the item to be updated.
      * @return RedirectResponse|JsonResponse The response to be sent back to the client.
-     * @throws ValidationException If the validation fails.
      */
-    public function update(Request $request, $id): RedirectResponse|JsonResponse
+    public function update(Request $request, int|string $id): RedirectResponse|JsonResponse
     {
         DB::beginTransaction();
         try {
             $item = $this->getItem($id);
-            $this->prepareForUpdate($request);
+            $this->prepareForUpdate($request, $item);
             $data = $this->getValidationData($request);
             $item->update($data);
             $this->updateCallback($request, $item);
@@ -60,12 +59,16 @@ trait HasUpdate
      * And you can implement the authorization logic here.
      *
      * @param Request $request The incoming request object.
+     * @param Model $item
      * @return void
      */
-    protected function prepareForUpdate(Request &$request): void
+    protected function prepareForUpdate(Request &$request, Model $item): void
     {
         // Implement any preparation logic needed before updating the model
         // Modify the request object as necessary
+        // Implement authorization logic here if needed
+        // Example: $this->authorize('update', $item);
+        // Example: $request->merge(['updated_at' => now()]);
     }
 
     protected function rules(): array
