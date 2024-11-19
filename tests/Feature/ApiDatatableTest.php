@@ -4,6 +4,7 @@ namespace Miladshm\ControllerHelpers\Tests\Feature;
 
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Config;
 use Miladshm\ControllerHelpers\Http\Controllers\TestController;
 use Miladshm\ControllerHelpers\Tests\TestCase;
 
@@ -44,5 +45,32 @@ class ApiDatatableTest extends TestCase
         $controller = new TestController;
         $path = $controller->getApiResource() ? ".items.meta.per_page" : ".items.per_page";
         $response->assertJsonPath(getConfigNames('response.field_names.data') . $path, getConfigNames("default_page_length"));
+    }
+
+    public function test_datatable_response_with_all_flag()
+    {
+        $response = $this->getJson('/testing?all=1');
+
+        $response->assertSuccessful();
+        $response->assertJsonStructure(getConfigNames('response.field_names'));
+        $response->assertJsonIsObject(getConfigNames('response.field_names.data'));
+        $response->assertSeeText(__('responder::messages.success_status.status'));
+        if (getConfigNames('get_all_wrapping.enabled'))
+            $response->assertJsonIsArray(getConfigNames('response.field_names.data') . ".items." . getConfigNames('get_all_wrapping.wrapper'));
+
+        else $response->assertJsonIsArray(getConfigNames('response.field_names.data') . ".items");
+    }
+
+    public function test_datatable_response_with_all_flag_when_data_wrapper_is_disabled()
+    {
+        Config::set('controller-helpers.get_all_wrapping.enabled', false);
+        $response = $this->getJson('/testing?all=1');
+
+        $response->assertSuccessful();
+        $response->assertJsonStructure(getConfigNames('response.field_names'));
+        $response->assertJsonIsObject(getConfigNames('response.field_names.data'));
+        $response->assertSeeText(__('responder::messages.success_status.status'));
+
+        $response->assertJsonIsArray(getConfigNames('response.field_names.data') . ".items");
     }
 }

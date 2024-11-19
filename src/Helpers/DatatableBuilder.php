@@ -55,29 +55,10 @@ class DatatableBuilder
     {
         $this->builder = $this->builder->select($this->fields);
         return $this->request->boolean('all')
-            ? $this->getAll()
+            ? $this->builder->get()
             : $this->builder
                 ->{$this->getPaginatorMethodName()}($this->getPageLength())
                 ->withQueryString();
-    }
-
-    /**
-     * Gets all the records from the database and wraps it in a collection with a root key.
-     *
-     * This method is used when the 'all' parameter is set to true. It wraps the records in a
-     * single key defined in the configuration. This is useful when you need to send a
-     * single root element in the response.
-     *
-     * @return Collection The collection of records with a root key.
-     */
-    private function getAll(): Collection
-    {
-        if (!getConfigNames('get_all_wrapping.enabled')) return $this->builder->get();
-
-        $wrapper = getConfigNames('get_all_wrapping.wrapper');
-        ${$wrapper} = $this->builder->get();
-
-        return collect(compact("{$wrapper}"));
     }
 
     /**
