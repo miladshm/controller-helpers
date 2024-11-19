@@ -4,7 +4,9 @@ namespace Miladshm\ControllerHelpers\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Miladshm\ControllerHelpers\Http\Requests\StoreRequest;
+use Miladshm\ControllerHelpers\Http\Resources\TestModelResource;
 use Miladshm\ControllerHelpers\Http\Traits\HasApiDatatable;
 use Miladshm\ControllerHelpers\Http\Traits\HasChangePosition;
 use Miladshm\ControllerHelpers\Http\Traits\HasChangeStatus;
@@ -36,8 +38,8 @@ class TestController extends Controller
         return new StoreRequest;
     }
 
-//    public function getJsonResourceClass(): ?JsonResource
-//    {
-//        return new TestModelResource($this->model());
-//    }
+    public function getJsonResourceClass(): ?JsonResource
+    {
+        return new TestModelResource($this->model());
+    }
 }

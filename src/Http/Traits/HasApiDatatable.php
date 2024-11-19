@@ -112,14 +112,18 @@ trait HasApiDatatable
         // If the items are a collection, transform them using the API resource
         if (is_a($items, Collection::class)) {
             if (!getConfigNames('get_all_wrapping.enabled')) {
-                return $items;
+                return $resource->collection($items)->response()->getData() ?? $items;
             }
 
             // Get the wrapper name from the config
             $wrapper = getConfigNames('get_all_wrapping.wrapper');
 
             // Transform the items using the API resource
-            ${$wrapper} = $resource?->collection($items)->response()->getData() ?? $items;
+
+            if ($resource) {
+                return $resource->collection($items)->response()->getData();
+            }
+            ${$wrapper} = $items;
 
             // Return the transformed items wrapped in a collection
             return collect(compact("{$wrapper}"));
