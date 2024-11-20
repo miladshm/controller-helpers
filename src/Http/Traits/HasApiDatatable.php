@@ -133,6 +133,8 @@ trait HasApiDatatable
 
                 // Return the transformed items wrapped in a collection
                 return collect(compact("{$wrapper}"));
+            } else {
+                JsonResource::withoutWrapping();
             }
         }
         // Return the transformed items using the API resource
