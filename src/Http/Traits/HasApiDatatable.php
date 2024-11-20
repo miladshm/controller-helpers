@@ -4,6 +4,7 @@ namespace Miladshm\ControllerHelpers\Http\Traits;
 
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Request;
@@ -102,6 +103,10 @@ trait HasApiDatatable
     /**
      * Retrieves the items from the builder and transforms them using the API resource if applicable.
      *
+     * This method takes the items retrieved from the builder and transforms them using the API resource
+     * if it is set. If the `get_all_wrapping.enabled` config is set to `true`, the items are wrapped in a
+     * collection with the wrapper name specified in the `get_all_wrapping.wrapper` config.
+     *
      * @param Paginator|Collection|CursorPaginator $items The items retrieved from the builder.
      * @return mixed The transformed items.
      */
@@ -111,26 +116,27 @@ trait HasApiDatatable
 
         // If the items are a collection, transform them using the API resource
         if (is_a($items, Collection::class)) {
-            if (!getConfigNames('get_all_wrapping.enabled')) {
-                return $resource->collection($items)->preserveQuery()->response()->getData() ?? $items;
+            // If the `get_all_wrapping.enabled` config is set to `true`, wrap the items in a collection
+            if (getConfigNames('get_all_wrapping.enabled')) {
+                // Get the wrapper name from the config
+                $wrapper = getConfigNames('get_all_wrapping.wrapper');
+
+                // Transform the items using the API resource
+                if ($resource) {
+                    // Wrap the items in a collection
+                    JsonResource::wrap($wrapper);
+                    return $resource->collection($items)->preserveQuery()->response()->getData();
+                }
+
+                // Set the wrapped items to the wrapper name
+                ${$wrapper} = $items;
+
+                // Return the transformed items wrapped in a collection
+                return collect(compact("{$wrapper}"));
             }
-
-            // Get the wrapper name from the config
-            $wrapper = getConfigNames('get_all_wrapping.wrapper');
-
-            // Transform the items using the API resource
-
-            if ($resource) {
-                return $resource->collection($items)->preserveQuery()->response()->getData();
-            }
-            ${$wrapper} = $items;
-
-            // Return the transformed items wrapped in a collection
-            return collect(compact("{$wrapper}"));
-        } else {
-            // Return the transformed items using the API resource
-            return $resource?->collection($items)->preserveQuery()->response()->getData() ?? $items;
         }
+        // Return the transformed items using the API resource
+        return $resource?->collection($items)->preserveQuery()->response()->getData() ?? $items;
     }
 
     /**
