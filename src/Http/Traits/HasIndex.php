@@ -29,8 +29,8 @@ trait HasIndex
         if (Request::expectsJson()) {
             // If an API resource is available, transform items using it
             if ($this->getApiResource()) {
-                $resource = get_class($this->getApiResource());
-                $items = forward_static_call([$resource, 'collection'], $items)->toArray(\request());
+                $resource = $this->getApiResource();
+                $items = $resource->collection($items)->response()->getData() ?? $items;
             }
             // Return a JSON response with items and extra data
             return ResponderFacade::setData(compact('items') + $this->extraData())->respond();

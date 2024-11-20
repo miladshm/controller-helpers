@@ -25,9 +25,7 @@ trait HasMarkDate
     public function mark(MarkRequest $request, int $id): JsonResponse
     {
         // Retrieve the record to be marked
-        $item = $this->model()->query()
-            ->when(true, fn($q) => $this->filters($q))
-            ->findOrFail($id);
+        $item = $this->getItem($id);
 
         // Determine the field to be updated
         $field = $request->input('field') ?? $this->getMarkField();

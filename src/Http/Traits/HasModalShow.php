@@ -16,7 +16,7 @@ trait HasModalShow
      */
     public function show($id): JsonResponse
     {
-        $item = $this->getModel($id);
+        $item = $this->getItem($id);
 
         $html = $this->showView()->with(compact('item'))->render();
 

@@ -35,21 +35,23 @@ trait HasStore
             $item = $this->model()->query()->create($data);
             $this->storeCallback($request, $item);
 
+
+            DB::commit();
+            if ($request->expectsJson()) {
+                if ($this->getApiResource()) {
+                    $resource = get_class($this->getApiResource());
+                    return ResponderFacade::setData((new $resource($item->fresh($this->relations())))->jsonSerialize())->setMessage(Lang::get('responder::messages.success_store.status'))->respond();
+                }
+                return ResponderFacade::setData($item->load($this->relations())->toArray())->setMessage(Lang::get('responder::messages.success_store.status'))->respond();
+            }
+            return Redirect::back()->with(Lang::get('responder::messages.success_status'));
+
         } catch (ValidationException|HttpException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
             DB::rollBack();
             return ResponderFacade::setExceptionMessage($exception->getMessage())->setMessage($exception->getMessage())->respondError();
         }
-        DB::commit();
-        if ($request->expectsJson()) {
-            if ($this->getApiResource()) {
-                $resource = get_class($this->getApiResource());
-                return ResponderFacade::setData((new $resource($item->fresh($this->relations())))->jsonSerialize())->setMessage(Lang::get('responder::messages.success_store.status'))->respond();
-            }
-            return ResponderFacade::setData($item->load($this->relations())->toArray())->setMessage(Lang::get('responder::messages.success_store.status'))->respond();
-        }
-        return Redirect::back()->with(Lang::get('responder::messages.success_status'));
     }
 
 

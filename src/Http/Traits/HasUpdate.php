@@ -29,28 +29,30 @@ trait HasUpdate
      */
     public function update(Request $request, int|string $id): RedirectResponse|JsonResponse
     {
+        $item = $this->getItem($id);
         DB::beginTransaction();
         try {
-            $item = $this->getItem($id);
             $this->prepareForUpdate($request, $item);
             $data = $this->getValidationData($request);
             $item->update($data);
             $this->updateCallback($request, $item);
+
+            DB::commit();
+            if ($request->expectsJson()) {
+                if ($this->getApiResource()) {
+                    $resource = get_class($this->getApiResource());
+                    return ResponderFacade::setData((new $resource($item->load($this->relations())))->jsonSerialize())->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
+                }
+                return ResponderFacade::setData($item->load($this->relations())->toArray())->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
+            }
+            return Redirect::back()->with(Lang::get('responder::messages.success_update'));
         } catch (ValidationException|HttpException $exception) {
+            DB::rollBack();
             throw $exception;
         } catch (Exception $exception) {
             DB::rollBack();
             return ResponderFacade::setMessage($exception->getMessage())->respondError();
         }
-        DB::commit();
-        if ($request->expectsJson()) {
-            if ($this->getApiResource()) {
-                $resource = get_class($this->getApiResource());
-                return ResponderFacade::setData((new $resource($item->load($this->relations())))->jsonSerialize())->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
-            }
-            return ResponderFacade::setData($item->load($this->relations())->toArray())->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
-        }
-        return Redirect::back()->with(Lang::get('responder::messages.success_update'));
     }
 
     /**

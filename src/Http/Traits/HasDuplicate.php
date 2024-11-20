@@ -3,6 +3,7 @@
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Miladshm\ControllerHelpers\Traits\WithModel;
 
@@ -19,12 +20,17 @@ trait HasDuplicate
     public function duplicate(int $id)
     {
         $item = $this->getItem($id);
+        DB::beginTransaction();
+        try {
+            $item = $item->replicate()->fill($this->duplicateChangedValues($item));
+            $item->save();
+            DB::commit();
+            return ResponderFacade::setData($item)->setMessage(trans('responder::messages.success_duplicate.status'))->respond();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return ResponderFacade::setExceptionMessage($e->getMessage())->setMessage($e->getMessage())->respondError();
+        }
 
-        $item = $item->replicate()->fill($this->duplicateChangedValues($item));
-
-        $item->save();
-
-        return ResponderFacade::setData($item)->setMessage(trans('responder::messages.success_duplicate.status'))->respond();
     }
 
     /**

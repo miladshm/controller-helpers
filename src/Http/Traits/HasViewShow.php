@@ -17,7 +17,7 @@ trait HasViewShow
      */
     public function show($id): View|JsonResponse
     {
-        $item = $this->getModel($id);
+        $item = $this->getItem($id);
         return $this->showView()->with(compact('item'));
     }
 }

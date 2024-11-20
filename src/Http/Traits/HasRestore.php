@@ -2,19 +2,19 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
+use Miladshm\ControllerHelpers\Traits\WithModel;
 
 trait HasRestore
 {
-    abstract private function model(): Model;
+    use WithModel;
 
     public function restore($id)
     {
-        $item = $this->model()->withTrashed()->findOrFail($id);
+        $item = $this->getItem($id, true);
 
         $item->restore();
 
