@@ -39,7 +39,7 @@ trait HasStore
             throw $exception;
         } catch (\Exception $exception) {
             DB::rollBack();
-            return ResponderFacade::setExceptionMessage($exception->getMessage())->respondError();
+            return ResponderFacade::setExceptionMessage($exception->getMessage())->setMessage($exception->getMessage())->respondError();
         }
         DB::commit();
         if ($request->expectsJson()) {

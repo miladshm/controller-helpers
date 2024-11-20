@@ -11,7 +11,7 @@ class StoreTest extends \Miladshm\ControllerHelpers\Tests\TestCase
 
     public function test_data_store_json()
     {
-        $res = $this->postJson('/testing', ['code' => $uuid = fake()->uuid, 'order' => 1, 'status' => 1]);
+        $res = $this->postJson('/testing', ['code' => $uuid = fake()->uuid, 'order' => 1, 'status' => 1, 'parent_id' => 1]);
 
         $res->assertSuccessful();
         $res->assertJsonStructure(getConfigNames('response.field_names'));
@@ -32,7 +32,7 @@ class StoreTest extends \Miladshm\ControllerHelpers\Tests\TestCase
 
     public function test_data_store_redirect()
     {
-        $res = $this->post('/testing', ['code' => $uuid = fake()->uuid, 'order' => 1, 'status' => 1]);
+        $res = $this->post('/testing', ['code' => $uuid = fake()->uuid, 'order' => 1, 'status' => 1, 'parent_id' => 1]);
 
         $res->assertRedirect();
         $res->assertSessionHasNoErrors();

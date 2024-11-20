@@ -45,6 +45,6 @@ class TestController extends Controller
 
     protected function relations(): array
     {
-        return ['rels'];
+        return ['rels', 'parent'];
     }
 }

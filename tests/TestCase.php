@@ -2,6 +2,7 @@
 
 namespace Miladshm\ControllerHelpers\Tests;
 
+use Miladshm\ControllerHelpers\Models\ParentModel;
 use Miladshm\ControllerHelpers\Models\TestModel;
 use Miladshm\ControllerHelpers\Models\TestRelModel;
 use Miladshm\ControllerHelpers\Providers\TestServiceProvider;
@@ -18,6 +19,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
         )->run();
         $tests = TestModel::factory(50)
             ->connection('testbench')
+            ->for(ParentModel::factory(), 'parent')
             ->has(TestRelModel::factory()->count(3), 'rels')
             ->create();
     }
