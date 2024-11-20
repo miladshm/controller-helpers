@@ -46,7 +46,7 @@ trait HasUpdate
         if ($request->expectsJson()) {
             if ($this->getApiResource()) {
                 $resource = get_class($this->getApiResource());
-                return ResponderFacade::setData(forward_static_call([$resource, 'make'], $item->load($this->relations()))->toArray($request))->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
+                return ResponderFacade::setData(forward_static_call([$resource, 'make'], $item->fresh($this->relations()))->toArray($request))->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
             }
             return ResponderFacade::setData($item->load($this->relations())->toArray())->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
         }
