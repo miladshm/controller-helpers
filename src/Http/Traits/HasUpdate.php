@@ -44,6 +44,10 @@ trait HasUpdate
         }
         DB::commit();
         if ($request->expectsJson()) {
+            if ($this->getApiResource()) {
+                $resource = get_class($this->getApiResource());
+                return ResponderFacade::setData((new $resource($item->load($this->relations())))->jsonSerialize())->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
+            }
             return ResponderFacade::setData($item->load($this->relations())->toArray())->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
         }
         return Redirect::back()->with(Lang::get('responder::messages.success_update'));

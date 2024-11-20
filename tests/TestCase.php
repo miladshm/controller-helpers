@@ -3,6 +3,7 @@
 namespace Miladshm\ControllerHelpers\Tests;
 
 use Miladshm\ControllerHelpers\Models\TestModel;
+use Miladshm\ControllerHelpers\Models\TestRelModel;
 use Miladshm\ControllerHelpers\Providers\TestServiceProvider;
 
 class TestCase extends \Orchestra\Testbench\TestCase
@@ -15,7 +16,10 @@ class TestCase extends \Orchestra\Testbench\TestCase
             'migrate',
             ['--database' => 'testbench']
         )->run();
-        TestModel::factory(50)->connection('testbench')->create();
+        $tests = TestModel::factory(50)
+            ->connection('testbench')
+            ->has(TestRelModel::factory()->count(3), 'rels')
+            ->create();
     }
 
     protected function getPackageProviders($app)

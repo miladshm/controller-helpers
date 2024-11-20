@@ -17,4 +17,9 @@ class TestModel extends \Illuminate\Database\Eloquent\Model
     {
         return new TestModelFactory();
     }
+
+    public function rels()
+    {
+        return $this->hasMany(TestRelModel::class);
+    }
 }

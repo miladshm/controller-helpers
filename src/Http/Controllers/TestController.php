@@ -42,4 +42,9 @@ class TestController extends Controller
     {
         return new TestModelResource($this->model());
     }
+
+    protected function relations(): array
+    {
+        return ['rels'];
+    }
 }
