@@ -24,9 +24,9 @@ trait WithModel
      * @return array|Builder|Builder[]|Collection|Model|HigherOrderWhenProxy|HigherOrderWhenProxy[]|null
      *     The retrieved item or null if not found.
      */
-    protected function getItem(int|string $id, bool $withTrashed = false): Model|Collection|array|Builder|HigherOrderWhenProxy|null
+    protected function getItem(int|string $id, bool $withTrashed = false, bool $withFilters = true): Model|Collection|array|Builder|HigherOrderWhenProxy|null
     {
-        return $this->query($withTrashed)
+        return $this->query($withTrashed, $withFilters)
             ->findOrFail($id);
     }
 
@@ -36,7 +36,7 @@ trait WithModel
      * @param bool $withTrashed If true, includes soft-deleted items in the query.
      * @return Builder The query builder for the model.
      */
-    private function query(bool $withTrashed = false): Builder
+    private function query(bool $withTrashed = false, bool $withFilters = true): Builder
     {
         // Initialize the query builder
         return $this->model()->query()
@@ -52,7 +52,7 @@ trait WithModel
                 $q->with($this->relations());
             })
             // Apply filters to the query
-            ->when(true, fn($q) => $this->filters($q));
+            ->when($withFilters, fn($q) => $this->filters($q));
     }
 
     /**

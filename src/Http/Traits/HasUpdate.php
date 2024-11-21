@@ -29,7 +29,7 @@ trait HasUpdate
      */
     public function update(Request $request, int|string $id): RedirectResponse|JsonResponse
     {
-        $item = $this->getItem($id);
+        $item = $this->getItem($id, withFilters: false);
         DB::beginTransaction();
         try {
             $this->prepareForUpdate($request, $item);
