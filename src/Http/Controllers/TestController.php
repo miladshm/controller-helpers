@@ -2,6 +2,7 @@
 
 namespace Miladshm\ControllerHelpers\Http\Controllers;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -46,5 +47,11 @@ class TestController extends Controller
     protected function relations(): array
     {
         return ['rels', 'parent'];
+    }
+
+    protected function filters(Builder $builder): null|Builder
+    {
+        return $builder
+            ->withCount('rels');
     }
 }
