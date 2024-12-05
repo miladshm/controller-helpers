@@ -53,7 +53,6 @@ class DatatableBuilder
      */
     public function paginate(): Paginator|Collection|CursorPaginator
     {
-        $this->builder = $this->builder->select($this->fields);
         return $this->request->boolean('all')
             ? $this->builder->get()
             : $this->builder

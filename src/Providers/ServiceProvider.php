@@ -2,7 +2,6 @@
 
 namespace Miladshm\ControllerHelpers\Providers;
 
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Config;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
@@ -16,9 +15,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             __DIR__ . "/../../config/controller-helpers.php" => config_path('controller-helpers.php')
         ], "controller-helpers-config");
 
-        if (getConfigNames('get_all_wrapping.enabled')) {
-            JsonResource::wrap(getConfigNames('get_all_wrapping.wrapper'));
-        } else JsonResource::withoutWrapping();
         date_default_timezone_set(Config::get('app.timezone'));
     }
 

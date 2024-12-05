@@ -49,16 +49,19 @@ class ApiDatatableTest extends TestCase
 
     public function test_datatable_response_with_all_flag()
     {
+        Config::set('controller-helpers.get_all_wrapping.enabled', true);
+        Config::set('controller-helpers.get_all_wrapping.wrapper', 'data');
+
         $response = $this->getJson('/testing?all=1');
+
 
         $response->assertSuccessful();
         $response->assertJsonStructure(getConfigNames('response.field_names'));
         $response->assertJsonIsObject(getConfigNames('response.field_names.data'));
         $response->assertSeeText(__('responder::messages.success_status.status'));
-        if (getConfigNames('get_all_wrapping.enabled'))
-            $response->assertJsonIsArray(getConfigNames('response.field_names.data') . ".items." . getConfigNames('get_all_wrapping.wrapper'));
 
-        else $response->assertJsonIsArray(getConfigNames('response.field_names.data') . ".items");
+        $response->assertJsonIsArray(getConfigNames('response.field_names.data') . ".items." . getConfigNames('get_all_wrapping.wrapper'));
+
     }
 
     public function test_datatable_response_with_all_flag_when_data_wrapper_is_disabled()

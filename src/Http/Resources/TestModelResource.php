@@ -23,10 +23,10 @@ class TestModelResource extends JsonResource
             'count' => $this->count,
             'parent_id' => $this->parent_id,
 
+            'rels_count' => $this->whenCounted('rels'),
             // Relations
             'parent' => new ParentModelResource($this->whenLoaded('parent')),
             'rels' => RelResource::collection($this->whenLoaded('rels')),
-
             'deleted_at' => $this->deleted_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
