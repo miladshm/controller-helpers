@@ -14,6 +14,7 @@ trait WithValidation
     private ?array $rules;
     private ?array $messages;
 
+
     /**
      * @return array
      */

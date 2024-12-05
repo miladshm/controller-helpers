@@ -31,7 +31,7 @@ trait HasStore
         DB::beginTransaction();
         try {
             $this->prepareForStore($request);
-            $data = $this->getValidationData($request);
+            $data = $this->setRequestClass($this->requestClass())->getValidationData($request);
             $item = $this->model()->query()->create($data);
             $this->storeCallback($request, $item);
 

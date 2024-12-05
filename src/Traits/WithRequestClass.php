@@ -7,15 +7,24 @@ use Illuminate\Foundation\Http\FormRequest;
 trait WithRequestClass
 {
 
-    abstract private function requestClass(): FormRequest;
+    private FormRequest $requestClass;
+
+    public function getRequestClass(): FormRequest
+    {
+        return $this->requestClass ?? $this->updateRequestClass();
+    }
+
+    public function setRequestClass(FormRequest $requestClass): static
+    {
+        $this->requestClass = $requestClass;
+
+        return $this;
+    }
 
     protected function updateRequestClass(): ?FormRequest
     {
-        return null;
+        return $this->requestClass();
     }
 
-    private function getRequestClass()
-    {
-        return $this->updateRequestClass() ?? $this->requestClass();
-    }
+    abstract private function requestClass(): FormRequest;
 }
