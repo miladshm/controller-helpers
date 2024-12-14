@@ -11,7 +11,7 @@ trait WithAggregates
             ? request()->collect(getConfigNames('params.counts'))
             : collect($this->counts())
         )
-            ->filter(fn($relation) => $this->model()->isRelation($relation))
+//            ->filter(fn($relation) => $this->model()->isRelation($relation))
             ->toArray();
     }
 
