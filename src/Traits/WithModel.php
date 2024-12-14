@@ -9,7 +9,7 @@ use Illuminate\Support\HigherOrderWhenProxy;
 
 trait WithModel
 {
-    use WithFilters, WithRelations, WithApiResource;
+    use WithFilters, WithRelations, WithApiResource, WithAggregates;
 
     /**
      * @var array|string[]
@@ -48,8 +48,12 @@ trait WithModel
                 fn(Builder $q) => $q->withTrashed()
             )
             // Eager load specified relations
-            ->when(count($this->relations()), function ($q) {
-                $q->with($this->relations());
+            ->when(count($this->getRelations()), function ($q) {
+                $q->with($this->getRelations());
+            })
+            // Eager load specified relations
+            ->when(count($this->getCounts()), function ($q) {
+                $q->withCount($this->getCounts());
             })
             // Apply filters to the query
             ->when($withFilters, fn($q) => $this->filters($q));

@@ -76,4 +76,19 @@ class ApiDatatableTest extends TestCase
 
         $response->assertJsonIsArray(getConfigNames('response.field_names.data') . ".items");
     }
+
+    public function test_datatable_response_with_counts()
+    {
+        $response = $this->getJson('/testing?count[]=rels');
+
+        $response->assertSuccessful();
+        $response->assertJsonStructure(getConfigNames('response.field_names'));
+        $response->assertJsonIsObject(getConfigNames('response.field_names.data'));
+        $response->assertSeeText(__('responder::messages.success_status.status'));
+
+
+        foreach ($response->json(getConfigNames('response.field_names.data') . '.items.data') as $item) {
+            $this->assertArrayHasKey('rels_count', $item);
+        }
+    }
 }

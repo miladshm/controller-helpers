@@ -16,7 +16,9 @@ return [
         'search' => 'q',
         'sort' => 'sort',
         'searchable_columns' => 'searchable',
-        'page_number' => 'page'
+        'page_number' => 'page',
+        'relations' => 'relation',
+        'counts' => 'count',
     ],
 
     'search' => [

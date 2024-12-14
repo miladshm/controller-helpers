@@ -51,7 +51,6 @@ class TestController extends Controller
 
     protected function filters(Builder $builder): null|Builder
     {
-        return $builder
-            ->withCount('rels');
+        return $builder;
     }
 }
