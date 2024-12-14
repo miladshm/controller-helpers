@@ -46,7 +46,7 @@ class TestController extends Controller
 
     protected function relations(): array
     {
-        return ['rels', 'parent'];
+        return [];
     }
 
     protected function filters(Builder $builder): null|Builder

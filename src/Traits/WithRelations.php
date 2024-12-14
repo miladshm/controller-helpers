@@ -11,7 +11,7 @@ trait WithRelations
             ? request()->collect(getConfigNames('params.relations'))
             : collect($this->relations())
         )
-            ->filter(fn($relation) => $this->model()->isRelation($relation))
+//            ->filter(fn($relation) => $this->model()->isRelation($relation))
             ->toArray();
     }
 
