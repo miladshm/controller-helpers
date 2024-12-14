@@ -47,6 +47,8 @@ trait WithModel
                 $withTrashed && method_exists($this->model(), 'withTrashed'),
                 fn(Builder $q) => $q->withTrashed()
             )
+            // Apply filters to the query
+            ->when($withFilters, fn($q) => $this->filters($q))
             // Eager load specified relations
             ->when(count($this->getRelations()), function ($q) {
                 $q->with($this->getRelations());
@@ -54,9 +56,7 @@ trait WithModel
             // Eager load specified relations
             ->when(count($this->getCounts()), function ($q) {
                 $q->withCount($this->getCounts());
-            })
-            // Apply filters to the query
-            ->when($withFilters, fn($q) => $this->filters($q));
+            });
     }
 
     /**
