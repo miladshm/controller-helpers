@@ -20,6 +20,38 @@ class ApiDatatableTest extends TestCase
         $response->assertSeeText(__('responder::messages.success_status.status'));
     }
 
+    public function test_datatable_response_order()
+    {
+
+        $sortParam = getConfigNames('params.sort');
+        $query = Arr::query([$sortParam . '[column]' => $order = fake()->randomElement(['id', 'code', 'order', 'status'])]);
+        $response = $this->getJson("/testing?$query");
+
+        $response->assertSuccessful();
+        $response->assertJsonStructure(getConfigNames('response.field_names'));
+        $response->assertJsonIsObject(getConfigNames('response.field_names.data'));
+        $response->assertSeeText(__('responder::messages.success_status.status'));
+
+        $path = ".filters.$sortParam.column";
+
+        $response->assertJsonPath(getConfigNames('response.field_names.data') . $path, $order);
+    }
+
+    public function test_datatable_response_search()
+    {
+
+        $searchParam = getConfigNames('params.search');
+        $query = Arr::query([$searchParam => $search = fake()->text(10)]);
+        $response = $this->getJson("/testing?$query");
+
+        $response->assertSuccessful();
+        $response->assertJsonStructure(getConfigNames('response.field_names'));
+        $response->assertJsonIsObject(getConfigNames('response.field_names.data'));
+        $response->assertSeeText(__('responder::messages.success_status.status'));
+        $path = ".filters.$searchParam";
+        $response->assertJsonPath(getConfigNames('response.field_names.data') . $path, $search);
+    }
+
     public function test_datatable_response_page_length()
     {
         $query = Arr::query([getConfigNames('params.page_length') => $length = fake()->randomNumber(3)]);
