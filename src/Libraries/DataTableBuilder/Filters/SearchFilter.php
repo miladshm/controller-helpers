@@ -28,13 +28,10 @@ class SearchFilter
     public function __invoke(Builder $builder, $next)
     {
         $searchParameter = getConfigNames('params.search');
-        if (!$this->request->filled($searchParameter)) {
-            return $next;
-        }
 
         $q = $this->request->{$searchParameter};
         // Apply search filters to the query builder.
-        $builder = $builder->where(function (Builder $s) use ($builder, $q) {
+        $builder->when($this->request->filled($searchParameter), fn(Builder $query) => $query->where(function (Builder $s) use ($builder, $q) {
             // Loop through the searchable fields and apply the search filter.
             foreach ($this->searchable ?? [] as $item) {
                 if (Str::contains($item, '.')) {
@@ -55,7 +52,7 @@ class SearchFilter
                     $s->orWhere($item, 'LIKE', "%$q%");
                 }
             }
-        });
+        }));
 
 
         return $next($builder);

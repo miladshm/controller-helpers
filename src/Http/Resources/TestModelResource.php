@@ -22,6 +22,7 @@ class TestModelResource extends JsonResource
             'order' => $this->order,
             'count' => $this->count,
             'parent_id' => $this->parent_id,
+            'name' => $this->name,
 
             'rels_count' => $this->whenCounted('rels'),
             // Relations

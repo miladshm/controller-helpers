@@ -177,7 +177,7 @@ trait HasApiDatatable
      */
     protected function getSearchable(): array
     {
-        return static::$searchable ?? getConfigNames('search.default_searchable');
+        return empty(static::$searchable) ? getConfigNames('search.default_searchable') : self::$searchable;
     }
 }
 

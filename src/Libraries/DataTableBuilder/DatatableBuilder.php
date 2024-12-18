@@ -32,15 +32,17 @@ class DatatableBuilder
             new SortFilter($this->request, $this->getOrder()),
         ];
 
-        $this->builder = Pipeline::send($this->builder)
+        return Pipeline::send($this->builder)
             ->through($pipes)
-            ->thenReturn();
+            ->then(function ($builder) {
+                return $this->request->boolean('all')
+                    ? $builder->get()
+                    : $builder
+                        ->{$this->getPaginatorMethodName()}($this->getPageLength())
+                        ->withQueryString();
+            });
 
-        return $this->request->boolean('all')
-            ? $this->builder->get()
-            : $this->builder
-                ->{$this->getPaginatorMethodName()}($this->getPageLength())
-                ->withQueryString();
+
 
     }
 
@@ -149,48 +151,6 @@ class DatatableBuilder
     }
 
     /**
-     * Apply search filters to the query builder.
-     *
-     * This method applies search filters to the query builder based on the request
-     * parameters. It takes the search query from the request and applies it to the
-     * searchable fields defined in the configuration or the request.
-     *
-     * @return DatatableBuilder Returns the current DatatableBuilder instance, allowing for method chaining.
-     */
-//    public function search(): static
-//    {
-//        $q = $this->request->{getConfigNames('params.search')};
-//        $searchable = $this->getSearchable();
-//        if ($this->request->filled(getConfigNames('params.search'))) {
-//            // Apply search filters to the query builder.
-//            $this->builder = $this->builder->where(function (Builder $s) use ($q, $searchable) {
-//                // Loop through the searchable fields and apply the search filter.
-//                foreach ($searchable ?? [] as $item) {
-//                    if (Str::contains($item, '.')) {
-//                        // If the field is a relationship, apply the search filter to the related table.
-//                        $rel = Str::beforeLast($item, '.');
-//                        $column = Str::afterLast($item, '.');
-//                        if (method_exists($this->builder->getModel(), Str::before($rel, '.'))) {
-//                            $s->orWhereHas($rel, function (Builder $s) use ($q, $column) {
-//                                // Check if the column exists in the related table.
-//                                if (Schema::connection($s->getModel()->getConnectionName())->hasColumn($s->getModel()->getTable(), $column)) {
-//                                    // Apply the search filter to the related table.
-//                                    $s->where($column, 'LIKE', "%$q%");
-//                                }
-//                            });
-//                        }
-//                    } elseif (Schema::connection($this->builder->getModel()->getConnectionName())->hasColumn($this->builder->getModel()->getTable(), $item)) {
-//                        // Apply the search filter to the current table.
-//                        $s->orWhere($item, 'LIKE', "%$q%");
-//                    }
-//                }
-//            });
-//        }
-//
-//        return $this;
-//    }
-
-    /**
      * Returns the page length based on the request or the default page length.
      *
      * This method returns the page length based on the request parameter 'page_length'
@@ -218,37 +178,6 @@ class DatatableBuilder
         $this->pageLength = $pageLength;
         return $this;
     }
-
-    /**
-     * Sorts the query builder results based on the request parameters or default settings.
-     *
-     * This method applies sorting to the query builder results using the column and direction
-     * specified in the request parameters. If the parameters are not provided, it falls back to
-     * default sorting using a configured order column or the primary key of the model.
-     *
-     * @return $this The current DatatableBuilder instance for method chaining.
-     */
-//    public function sortResult(): static
-//    {
-//        // Check if the request contains sort parameters for column and direction.
-//        if ($this->request->filled(getConfigNames('params.sort') . ".column")) {
-//            // Retrieve sort details from the request.
-//            $sort = $this->request->{getConfigNames('params.sort')};
-//            // Apply sorting using the specified column and direction or defaults.
-//            $this->builder = $this->builder->orderBy($sort['column'] ?? $this->builder->getModel()->getKeyName(), $sort['dir'] ?? $this->getOrder());
-//
-//            // Check if a default order column is configured in the schema.
-//        } elseif (Schema::hasColumn($this->builder->getModel()->getTable(), getConfigNames('order_column'))) {
-//            // Apply sorting using the configured order column.
-//            $this->builder = $this->builder->orderBy(getConfigNames('order_column'));
-//
-//            // Default sorting by the primary key of the model with a specified direction.
-//        } else {
-//            $this->builder = $this->builder->orderBy($this->builder->getModel()->getKeyName(), $this->getOrder());
-//        }
-//
-//        return $this;
-//    }
 
     /**
      * Sets the request object for the DatatableBuilder.

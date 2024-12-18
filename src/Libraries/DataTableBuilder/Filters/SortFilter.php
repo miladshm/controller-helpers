@@ -26,10 +26,12 @@ class SortFilter
      */
     public function __invoke(Builder $builder, $next)
     {
+        $sortParam = getConfigNames('params.sort');
+
         // Check if the request contains sort parameters for column and direction.
-        if ($this->request->filled(getConfigNames('params.sort') . ".column")) {
+        if ($this->request->filled($sortParam) . ".column") {
             // Retrieve sort details from the request.
-            $sort = $this->request->{getConfigNames('params.sort')};
+            $sort = $this->request->{$sortParam};
             // Apply sorting using the specified column and direction or defaults.
             $builder = $builder->orderBy($sort['column'] ?? $builder->getModel()->getKeyName(), $sort['dir'] ?? $this->order);
 
