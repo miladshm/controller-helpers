@@ -24,6 +24,7 @@ class StoreRequest extends FormRequest
             'code' => ['required'],
             'status' => ['nullable', 'boolean'],
             'order' => ['required', 'integer'],
+            'name' => ['required', 'string'],
             'parent_id' => ['integer', 'exists:parent_models,id'],
         ];
     }

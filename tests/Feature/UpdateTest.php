@@ -11,7 +11,7 @@ class UpdateTest extends \Miladshm\ControllerHelpers\Tests\TestCase
 
     public function test_data_update_json()
     {
-        $res = $this->putJson("/testing/" . rand(1, 50), ['code' => $uuid = fake()->uuid, 'order' => 1, 'status' => 1]);
+        $res = $this->putJson("/testing/" . rand(1, 50), ['code' => $uuid = fake()->uuid, 'name' => fake()->text(), 'order' => 1, 'status' => 1]);
 
         $res->assertSuccessful();
         $res->assertJsonStructure(getConfigNames('response.field_names'));
@@ -32,7 +32,7 @@ class UpdateTest extends \Miladshm\ControllerHelpers\Tests\TestCase
 
     public function test_data_update_redirect()
     {
-        $res = $this->put('/testing/' . rand(1, 50), ['code' => $uuid = fake()->uuid, 'order' => 1, 'status' => 1]);
+        $res = $this->put('/testing/' . rand(1, 50), ['code' => $uuid = fake()->uuid, 'name' => fake()->text(), 'order' => 1, 'status' => 1]);
 
         $res->assertRedirect();
         $res->assertSessionHasNoErrors();
