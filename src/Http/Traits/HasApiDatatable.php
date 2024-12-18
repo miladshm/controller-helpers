@@ -8,8 +8,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Request;
-use Miladshm\ControllerHelpers\Helpers\DatatableBuilder;
 use Miladshm\ControllerHelpers\Http\Requests\ListRequest;
+use Miladshm\ControllerHelpers\Libraries\DataTableBuilder\DatatableBuilder;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Miladshm\ControllerHelpers\Traits\WithExtraData;
 use Miladshm\ControllerHelpers\Traits\WithModel;
@@ -80,9 +80,7 @@ trait HasApiDatatable
             ->setPaginator($this->getPaginator()) // Set the paginator type
             ->setFields($this->getColumns()) // Set the fields to retrieve
             ->setOrder($this->getOrder()) // Set the order direction
-            ->search() // Apply search filters
-            ->sortResult() // Apply sorting
-            ->paginate(); // Paginate the results
+            ->handle(); // Paginate the results
 
         // Get the applied filters
         $filters = Request::query();
