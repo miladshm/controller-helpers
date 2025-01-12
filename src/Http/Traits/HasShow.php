@@ -27,7 +27,7 @@ trait HasShow
 
         if ($this->getApiResource()) {
             $resource = get_class($this->getApiResource());
-            return ResponderFacade::setData((new $resource($item->load($this->getRelations())))->jsonSerialize())->respond();
+            return ResponderFacade::setData((new $resource($item))->jsonSerialize())->respond();
         }
         return ResponderFacade::setData($item->toArray())->respond();
     }
