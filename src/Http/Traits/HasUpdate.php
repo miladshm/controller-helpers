@@ -3,7 +3,9 @@
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -46,7 +48,7 @@ trait HasUpdate
                 return ResponderFacade::setData($item->load($this->relations())->toArray())->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
             }
             return Redirect::back()->with(Lang::get('responder::messages.success_update'));
-        } catch (ValidationException|HttpException $exception) {
+        } catch (ValidationException|HttpException|AuthorizationException|ModelNotFoundException $exception) {
             DB::rollBack();
             throw $exception;
         } catch (Exception $exception) {

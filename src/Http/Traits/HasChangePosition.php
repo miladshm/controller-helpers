@@ -2,12 +2,16 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Http\Requests\ChangePositionRequest;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Miladshm\ControllerHelpers\Traits\WithModel;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * This trait provides a method to change the position of an item in a sorted list.
@@ -32,39 +36,40 @@ trait HasChangePosition
      */
     public function changePosition(ChangePositionRequest $request, int $id)
     {
-        // Retrieve the item to be moved using the provided ID
-        $item = $this->model()->query()->findOrFail($id);
 
-        // Determine the comparison operator and sort order based on the action
-        $operator = $request->input('action') === 'up' ? '<' : '>';
-        $order = $request->input('action') === 'up' ? 'desc' : 'asc';
+        DB::beginTransaction();
+        try {// Retrieve the item to be moved using the provided ID
+            $item = $this->model()->query()->findOrFail($id);// Determine the comparison operator and sort order based on the action
+            $operator = $request->input('action') === 'up' ? '<' : '>';
+            $order = $request->input('action') === 'up' ? 'desc' : 'asc';// Find the adjacent item to swap positions with
+            $second_item = $this->model()->newQuery()
+                ->when(true, fn($q) => $this->filters($q))
+                ->where($this->getPositionColumn(), $operator, $item->{$this->getPositionColumn()})
+                ->orderBy($this->getPositionColumn(), $order)
+                ->firstOr(function () use ($request) {
+                    // Throw a validation exception if there's no item to swap with
+                    $message = $request->input('action') === 'up'
+                        ? Lang::get('responder::messages.cannot_lift_up')
+                        : Lang::get('responder::messages.cannot_get_down');
 
-        // Find the adjacent item to swap positions with
-        $second_item = $this->model()->newQuery()
-            ->when(true, fn($q) => $this->filters($q))
-            ->where($this->getPositionColumn(), $operator, $item->{$this->getPositionColumn()})
-            ->orderBy($this->getPositionColumn(), $order)
-            ->firstOr(function () use ($request) {
-                // Throw a validation exception if there's no item to swap with
-                $message = $request->input('action') === 'up'
-                    ? Lang::get('responder::messages.cannot_lift_up')
-                    : Lang::get('responder::messages.cannot_get_down');
-
-                throw ValidationException::withMessages([$this->getPositionColumn() => $message]);
-            });
-
-        // Store the positions of both items
-        $second_item_position = $second_item->{$this->getPositionColumn()};
-        $item_position = $item->{$this->getPositionColumn()};
-
-        // Swap the positions of the two items
-        $item->update([
-            $this->getPositionColumn() => $second_item_position
-        ]);
-
-        $second_item->update([
-            $this->getPositionColumn() => $item_position
-        ]);
+                    throw ValidationException::withMessages([$this->getPositionColumn() => $message]);
+                });// Store the positions of both items
+            $second_item_position = $second_item->{$this->getPositionColumn()};
+            $item_position = $item->{$this->getPositionColumn()};// Swap the positions of the two items
+            $item->update([
+                $this->getPositionColumn() => $second_item_position
+            ]);
+            $second_item->update([
+                $this->getPositionColumn() => $item_position
+            ]);
+            DB::commit();
+        } catch (ValidationException|HttpException|AuthorizationException|ModelNotFoundException $e) {
+            DB::rollBack();
+            throw $e;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return ResponderFacade::setMessage($e->getMessage())->respondError();
+        }
 
         // Return a response indicating the operation was successful
         return ResponderFacade::respond();

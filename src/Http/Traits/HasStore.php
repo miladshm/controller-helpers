@@ -2,6 +2,7 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -46,7 +47,7 @@ trait HasStore
             }
             return Redirect::back()->with(Lang::get('responder::messages.success_status'));
 
-        } catch (ValidationException|HttpException $exception) {
+        } catch (ValidationException|HttpException|AuthorizationException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
             DB::rollBack();

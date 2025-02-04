@@ -2,7 +2,9 @@
 
 namespace Miladshm\ControllerHelpers\Http\Traits;
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -50,7 +52,7 @@ trait HasDestroy
             if (Request::expectsJson())
                 return ResponderFacade::setMessage(Lang::get('responder::messages.success_delete.status'))->respond();
             return Redirect::back()->with(Lang::get('responder::messages.success_delete'));
-        } catch (HttpException $exception) {
+        } catch (HttpException|AuthorizationException|ModelNotFoundException $exception) {
             DB::rollBack();
             return ResponderFacade::setMessage($exception->getMessage())->setHttpCode($exception->getStatusCode())->respondError();
         } catch (\Throwable $e) {
