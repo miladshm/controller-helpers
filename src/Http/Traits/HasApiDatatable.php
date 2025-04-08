@@ -72,30 +72,26 @@ trait HasApiDatatable
      */
     public function index(ListRequest $request, DatatableBuilder $datatable): JsonResponse
     {
-        $items = $datatable
-            ->setRequest($request) // Set the request for the builder
-            ->setBuilder($this->query()) // Set the builder to the getItems method
-            ->setSearchable($this->getSearchable()) // Set the searchable fields
-            ->setPageLength($this->getPageLength()) // Set the page length for pagination
-            ->setPaginator($this->getPaginator()) // Set the paginator type
-            ->setFields($this->getColumns()) // Set the fields to retrieve
-            ->setOrder($this->getOrder()) // Set the order direction
-            ->handle(); // Paginate the results
 
-        // Get the applied filters
-        $filters = Request::query();
-
-        // Get the items using the getItems method
-        $items = $this->getItems($items);
-
-        // Get any extra data
-        $extraData = $this->extraData();
-
-        // Create the response data
-        $data = compact('items', 'filters') + $extraData;
-
-        // Return the JSON response
-        return ResponderFacade::setData($data)->respond();
+        try {
+            $items = $datatable
+                ->setRequest($request) // Set the request for the builder
+                ->setBuilder($this->query()) // Set the builder to the getItems method
+                ->setSearchable($this->getSearchable()) // Set the searchable fields
+                ->setPageLength($this->getPageLength()) // Set the page length for pagination
+                ->setPaginator($this->getPaginator()) // Set the paginator type
+                ->setFields($this->getColumns()) // Set the fields to retrieve
+                ->setOrder($this->getOrder()) // Set the order direction
+                ->handle();// Paginate the results
+            // Get the applied filters
+            $filters = Request::query();// Get the items using the getItems method
+            $items = $this->getItems($items);// Get any extra data
+            $extraData = $this->extraData();// Create the response data
+            $data = compact('items', 'filters') + $extraData;// Return the JSON response
+            return ResponderFacade::setData($data)->respond();
+        } catch (\Exception $e) {
+            return ResponderFacade::setMessage($e->getMessage())->setData($e->getTrace())->respondError();
+        }
     }
 
     /**

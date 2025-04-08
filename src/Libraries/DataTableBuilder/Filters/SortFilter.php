@@ -31,9 +31,9 @@ class SortFilter
         // Check if the request contains sort parameters for column and direction.
         if ($this->request->filled($sortParam) . ".column") {
             // Retrieve sort details from the request.
-            $sort = $this->request->{$sortParam};
+            $sort = $this->request->collect($sortParam);
             // Apply sorting using the specified column and direction or defaults.
-            $builder = $builder->orderBy($builder->qualifyColumn($sort['column']) ?? $builder->getModel()->getQualifiedKeyName(), $sort['dir'] ?? $this->order);
+            $builder = $builder->orderBy( $sort->get('column') ? $builder->qualifyColumn($sort->get('column')) : $builder->getModel()->getQualifiedKeyName(), $sort['dir'] ?? $this->order);
 
             // Check if a default order column is configured in the schema.
         } elseif (Schema::hasColumn($builder->getModel()->getTable(), getConfigNames('order_column'))) {
