@@ -33,16 +33,16 @@ class SortFilter
             // Retrieve sort details from the request.
             $sort = $this->request->{$sortParam};
             // Apply sorting using the specified column and direction or defaults.
-            $builder = $builder->orderBy($sort['column'] ?? $builder->getModel()->getKeyName(), $sort['dir'] ?? $this->order);
+            $builder = $builder->orderBy($builder->qualifyColumn($sort['column']) ?? $builder->getModel()->getQualifiedKeyName(), $sort['dir'] ?? $this->order);
 
             // Check if a default order column is configured in the schema.
         } elseif (Schema::hasColumn($builder->getModel()->getTable(), getConfigNames('order_column'))) {
             // Apply sorting using the configured order column.
-            $builder = $builder->orderBy(getConfigNames('order_column'));
+            $builder = $builder->orderBy($builder->qualifyColumn(getConfigNames('order_column')));
 
             // Default sorting by the primary key of the model with a specified direction.
         } else {
-            $builder = $builder->orderBy($builder->getModel()->getKeyName(), $this->order);
+            $builder = $builder->orderBy($builder->getModel()->getQualifiedKeyName(), $this->order);
         }
 
         return $next($builder);
