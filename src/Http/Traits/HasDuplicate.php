@@ -38,7 +38,7 @@ trait HasDuplicate
 
         // Get the validated data from the incoming request.
         // This is done by calling the getValidationData method, which is assumed to be implemented elsewhere.
-        $data = $this->when($this->duplicateRequestClass(), fn() => $this->setRequestClass($this->duplicateRequestClass()))->getValidationData($request);
+        $data = $this->when($this->duplicateRequestClass(), fn($class) => $class->setRequestClass($this->duplicateRequestClass()))->getValidationData($request);
 
         // Begin a database transaction to ensure atomicity.
         // This means that either all changes will be committed, or none will be, in case of an error.
