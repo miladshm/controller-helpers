@@ -6,12 +6,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Miladshm\ControllerHelpers\Http\Requests\DuplicateRequest;
 use Miladshm\ControllerHelpers\Http\Requests\StoreRequest;
 use Miladshm\ControllerHelpers\Http\Resources\TestModelResource;
 use Miladshm\ControllerHelpers\Http\Traits\HasApiDatatable;
 use Miladshm\ControllerHelpers\Http\Traits\HasChangePosition;
 use Miladshm\ControllerHelpers\Http\Traits\HasChangeStatus;
 use Miladshm\ControllerHelpers\Http\Traits\HasDestroy;
+use Miladshm\ControllerHelpers\Http\Traits\HasDuplicate;
 use Miladshm\ControllerHelpers\Http\Traits\HasGetCount;
 use Miladshm\ControllerHelpers\Http\Traits\HasGetSum;
 use Miladshm\ControllerHelpers\Http\Traits\HasShow;
@@ -21,7 +23,7 @@ use Miladshm\ControllerHelpers\Models\TestModel;
 
 class TestController extends Controller
 {
-    use HasStore, HasApiDatatable, HasUpdate, HasDestroy, HasShow, HasChangePosition, HasChangeStatus, HasGetCount, HasGetSum;
+    use HasStore, HasApiDatatable, HasUpdate, HasDestroy, HasShow, HasChangePosition, HasChangeStatus, HasGetCount, HasGetSum, HasDuplicate;
 
     /**
      * @return Model
@@ -53,4 +55,11 @@ class TestController extends Controller
     {
         return $builder;
     }
+
+    protected function duplicateRequestClass(): ?FormRequest
+    {
+        return new DuplicateRequest();
+    }
+
+
 }

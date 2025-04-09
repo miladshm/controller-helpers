@@ -2,6 +2,7 @@
 
 namespace Miladshm\ControllerHelpers\Factories;
 
+use Miladshm\ControllerHelpers\Models\ParentModel;
 use Miladshm\ControllerHelpers\Models\TestModel;
 
 class TestModelFactory extends \Illuminate\Database\Eloquent\Factories\Factory
@@ -19,7 +20,8 @@ class TestModelFactory extends \Illuminate\Database\Eloquent\Factories\Factory
             'order' => fake()->unique(1, 50)->numberBetween(1, 50),
             'name' => fake()->text(),
             'count' => fake()->numberBetween(1, 500),
-            'status' => fake()->boolean(90)
+            'status' => fake()->boolean(90),
+            'parent_id' => ParentModel::factory()
         ];
     }
 }
