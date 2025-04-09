@@ -34,7 +34,7 @@ trait HasDuplicate
     {
         // Retrieve the record to be duplicated from the database.
         // This is done by calling the getItem method, which is assumed to be implemented elsewhere.
-        $original = $this->getItem($id);
+        $original = $this->getItem($id, withFilters: false);
 
         // Get the validated data from the incoming request.
         // This is done by calling the getValidationData method, which is assumed to be implemented elsewhere.
