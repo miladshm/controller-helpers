@@ -4,12 +4,13 @@ namespace Miladshm\ControllerHelpers\Traits;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Traits\Conditionable;
 use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Exceptions\ApiValidationException;
 
 trait WithValidation
 {
-    use WithRequestClass;
+    use WithRequestClass, Conditionable;
 
     private ?array $rules;
     private ?array $messages;
