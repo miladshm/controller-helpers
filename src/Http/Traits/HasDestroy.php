@@ -42,7 +42,7 @@ trait HasDestroy
             // Perform any necessary actions before deleting a record.
             // This method can be overridden in child classes to add custom logic before deleting a record.
             $this->prepareForDestroy($item);// If the record is soft-deleted, it will be permanently deleted using the `forceDelete` method.
-            $item = $item->withoutEagerLoads();
+
             // If the record is not soft-deleted, it will be deleted using the `deleteOrFail` method.
             if ($item->deleted_at)
                 $item->forceDelete();
