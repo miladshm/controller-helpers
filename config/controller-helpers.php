@@ -34,4 +34,28 @@ return [
         'path' => app_path("Http/Resources"),
     ],
 
+    // Performance optimization settings
+    'performance' => [
+        'max_page_length' => 500,
+        'max_records_without_pagination' => 10000,
+        'enable_query_cache' => true,
+        'enable_performance_metrics' => false,
+        'chunk_size' => 1000,
+    ],
+
+    // Transaction settings
+    'transactions' => [
+        'use_for_simple_operations' => false,
+        'use_for_store' => true,
+        'use_for_update' => true,
+        'use_for_delete' => true,
+    ],
+
+    // Caching settings
+    'cache' => [
+        'enable_config_cache' => true,
+        'enable_schema_cache' => true,
+        'config_cache_ttl' => 3600, // 1 hour
+        'schema_cache_ttl' => 7200, // 2 hours
+    ],
 ];

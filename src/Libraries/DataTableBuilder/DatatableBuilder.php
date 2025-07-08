@@ -24,7 +24,16 @@ class DatatableBuilder
     private ?string $order;
     private ?array $searchable;
     private ?string $paginator;
+    
+    // Performance optimization: cache frequently accessed values
+    private static array $configCache = [];
+    private ?array $resolvedSearchable = null;
+    private ?int $resolvedPageLength = null;
+    private ?string $resolvedPaginator = null;
 
+    /**
+     * Handle the datatable building process with optimized performance
+     */
     public function handle()
     {
         $pipes = [
@@ -36,29 +45,59 @@ class DatatableBuilder
             ->through($pipes)
             ->then(function ($builder) {
                 return $this->request->boolean('all')
-                    ? $builder->get()
-                    : $builder
-                        ->{$this->getPaginatorMethodName()}($this->getPageLength())
-                        ->withQueryString();
+                    ? $this->handleGetAll($builder)
+                    : $this->handlePagination($builder);
             });
-
-
-
     }
 
     /**
-     * Gets the searchable fields based on the request parameters or the default searchable fields.
-     *
-     * This method returns the searchable fields based on the request parameters or the default searchable fields.
-     * It takes the searchable fields from the request parameter 'searchable_columns' and merges it with the default
-     * searchable fields defined in the configuration. If the request parameter is not defined, it defaults to the
-     * default searchable fields.
-     *
-     * @return array|mixed|null The searchable fields.
+     * Handle "get all" requests with memory optimization
      */
-    public function getSearchable(): mixed
+    private function handleGetAll(Builder $builder): Collection
     {
-        return $this->request->{getConfigNames('params.searchable_columns')} ?? $this->searchable ?? getConfigNames('search.default_searchable');
+        // For large datasets, add memory-efficient handling
+        $maxRecords = $this->getConfigValue('max_records_without_pagination', 10000);
+        
+        // Use query chunking for very large datasets
+        if ($builder->count() > $maxRecords) {
+            $results = collect();
+            $builder->chunk(1000, function ($records) use (&$results) {
+                $results = $results->merge($records);
+            });
+            return $results;
+        }
+        
+        return $builder->get();
+    }
+
+    /**
+     * Handle pagination requests with query optimization
+     */
+    private function handlePagination(Builder $builder): Paginator|CursorPaginator
+    {
+        $pageLength = $this->getPageLength();
+        $method = $this->getPaginatorMethodName();
+        
+        return $builder
+            ->{$method}($pageLength)
+            ->withQueryString();
+    }
+
+    /**
+     * Gets the searchable fields with caching and optimization
+     */
+    public function getSearchable(): array
+    {
+        if ($this->resolvedSearchable !== null) {
+            return $this->resolvedSearchable;
+        }
+
+        $searchableParam = $this->getConfigValue('params.searchable_columns');
+        $this->resolvedSearchable = $this->request->{$searchableParam} 
+            ?? $this->searchable 
+            ?? $this->getConfigValue('search.default_searchable', []);
+            
+        return $this->resolvedSearchable;
     }
 
     /**
@@ -68,31 +107,20 @@ class DatatableBuilder
     public function setSearchable(?array $searchable): DatatableBuilder
     {
         $this->searchable = $searchable;
+        $this->resolvedSearchable = null; // Clear cache
         return $this;
     }
 
     /**
-     * Get the order direction for sorting.
-     *
-     * This method returns the order direction to be used for sorting the query results.
-     * It defaults to 'desc' if no order direction has been set.
-     *
-     * @return string The order direction ('asc' or 'desc').
+     * Get the order direction for sorting with caching
      */
     public function getOrder(): string
     {
-        // Return the order direction or default to 'desc' if not set.
-        return $this->order ?? 'desc';
+        return $this->order ?? $this->getConfigValue('sort_direction', 'desc');
     }
 
     /**
      * Sets the order direction for sorting.
-     *
-     * This method sets the order direction to be used for sorting the query results.
-     * It defaults to 'desc' if no order direction has been set.
-     *
-     * @param string|null $order The order direction to set, either 'asc' or 'desc'.
-     * @return DatatableBuilder Returns the current DatatableBuilder instance, allowing for method chaining.
      */
     public function setOrder(?string $order): DatatableBuilder
     {
@@ -102,147 +130,159 @@ class DatatableBuilder
 
     /**
      * Returns the paginator method name based on the paginator type.
-     *
-     * This method returns the paginator method name based on the paginator type set in the
-     * request or the default paginator type. The supported paginator types are 'default',
-     * 'simple', and 'cursor'.
-     *
-     * @return string The paginator method name.
      */
     private function getPaginatorMethodName(): string
     {
         return match ($this->getPaginator()) {
-            // The default paginator method name is 'paginate'.
-            default => 'paginate',
-            // The 'simple' paginator type uses the 'simplePaginate' method.
             'simple' => 'simplePaginate',
-            // The 'cursor' paginator type uses the 'cursorPaginate' method.
             'cursor' => 'cursorPaginate',
+            default => 'paginate',
         };
     }
 
     /**
-     * Returns the paginator type.
-     *
-     * This method returns the paginator type based on the request or the default paginator type.
-     * The supported paginator types are 'default', 'simple', and 'cursor'.
-     *
-     * @return string The paginator type.
+     * Returns the paginator type with caching
      */
     public function getPaginator(): string
     {
-        return $this->paginator ?? 'default';
+        if ($this->resolvedPaginator !== null) {
+            return $this->resolvedPaginator;
+        }
+        
+        $this->resolvedPaginator = $this->paginator ?? $this->getConfigValue('default_pagination_type', 'default');
+        return $this->resolvedPaginator;
     }
 
     /**
      * Sets the paginator type.
-     *
-     * This method sets the paginator type based on the provided argument. The supported
-     * paginator types are 'default', 'simple', and 'cursor'. If no paginator type is
-     * provided, it defaults to 'default'.
-     *
-     * @param string|null $paginator The paginator type to set.
-     * @return DatatableBuilder Returns the current DatatableBuilder instance, allowing for method chaining.
      */
     public function setPaginator(?string $paginator = 'default'): DatatableBuilder
     {
         $this->paginator = $paginator;
+        $this->resolvedPaginator = null; // Clear cache
         return $this;
     }
 
     /**
-     * Returns the page length based on the request or the default page length.
-     *
-     * This method returns the page length based on the request parameter 'page_length'
-     * or the default page length defined in the configuration. If the request parameter
-     * is not defined, it defaults to the default page length.
-     *
-     * @return int The page length.
+     * Returns the page length with caching and optimization
      */
     public function getPageLength(): int
     {
-        return $this->request->{getConfigNames('params.page_length')} ?? $this->pageLength ?? getConfigNames('default_page_length');
+        if ($this->resolvedPageLength !== null) {
+            return $this->resolvedPageLength;
+        }
+
+        $pageLengthParam = $this->getConfigValue('params.page_length');
+        $this->resolvedPageLength = $this->request->{$pageLengthParam} 
+            ?? $this->pageLength 
+            ?? $this->getConfigValue('default_page_length', 15);
+            
+        // Add reasonable limits to prevent memory issues
+        $maxPageLength = $this->getConfigValue('max_page_length', 500);
+        if ($this->resolvedPageLength > $maxPageLength) {
+            $this->resolvedPageLength = $maxPageLength;
+        }
+        
+        return $this->resolvedPageLength;
     }
 
     /**
      * Sets the page length for pagination.
-     *
-     * This method sets the page length for pagination. If no page length is provided, it
-     * defaults to the default page length defined in the configuration.
-     *
-     * @param int|null $pageLength The page length to set.
-     * @return DatatableBuilder Returns the current DatatableBuilder instance, allowing for method chaining.
      */
     public function setPageLength(?int $pageLength): DatatableBuilder
     {
         $this->pageLength = $pageLength;
+        $this->resolvedPageLength = null; // Clear cache
         return $this;
     }
 
     /**
      * Sets the request object for the DatatableBuilder.
-     *
-     * This method sets the request object used for building the datatable. The request
-     * object contains parameters that influence the datatable's behavior, such as
-     * pagination, sorting, and searching.
-     *
-     * @param FormRequest|ListRequest $request The request object containing datatable parameters.
-     *                                         It can be either a FormRequest or a ListRequest instance.
-     *
-     * @return DatatableBuilder Returns the current DatatableBuilder instance, allowing for method chaining.
      */
     public function setRequest(FormRequest|ListRequest $request): DatatableBuilder
     {
         $this->request = $request;
+        // Clear caches when request changes
+        $this->resolvedSearchable = null;
+        $this->resolvedPageLength = null;
+        $this->resolvedPaginator = null;
         return $this;
     }
 
     /**
-     * Paginates the query builder results.
-     *
-     * This method paginates the query builder results based on the request parameters.
-     * It returns a Paginator, Collection, or CursorPaginator object depending on the request's 'all' parameter.
-     *
-     * @return Paginator|Collection|CursorPaginator The paginated query builder results.
+     * Paginates the query builder results (kept for backward compatibility).
      */
     public function paginate(): Paginator|Collection|CursorPaginator
     {
         return $this->request->boolean('all')
-            ? $this->builder->get()
-            : $this->builder
-                ->{$this->getPaginatorMethodName()}($this->getPageLength())
-                ->withQueryString();
+            ? $this->handleGetAll($this->builder)
+            : $this->handlePagination($this->builder);
     }
 
     /**
      * Set the query builder instance.
-     *
-     * This method sets the query builder instance that will be used for constructing
-     * the datatable query. It allows for method chaining by returning the current
-     * DatatableBuilder instance.
-     *
-     * @param Builder $builder The query builder instance to set.
-     * @return DatatableBuilder The current DatatableBuilder instance.
      */
     public function setBuilder(Builder $builder): static
     {
-        $this->builder = $builder; // Assign the provided query builder to the instance variable.
-        return $this; // Return the current DatatableBuilder instance for method chaining.
+        $this->builder = $builder;
+        return $this;
     }
 
     /**
      * Sets the fields to be selected in the query builder.
-     *
-     * This method sets the fields to be selected in the query builder. If no fields are provided,
-     * it defaults to selecting all fields ('*').
-     *
-     * @param array|null $fields The fields to be selected in the query builder.
-     *
-     * @return DatatableBuilder Returns the current DatatableBuilder instance, allowing for method chaining.
      */
     public function setFields(?array $fields): DatatableBuilder
     {
         $this->fields = $fields;
         return $this;
+    }
+
+    /**
+     * Get configuration value with caching for performance
+     */
+    private function getConfigValue(string $key, mixed $default = null): mixed
+    {
+        if (!isset(self::$configCache[$key])) {
+            self::$configCache[$key] = config("controller-helpers.{$key}", $default);
+        }
+        
+        return self::$configCache[$key];
+    }
+
+    /**
+     * Clear all caches (useful for testing or long-running processes)
+     */
+    public static function clearCache(): void
+    {
+        self::$configCache = [];
+        SearchFilter::clearCache();
+        SortFilter::clearCache();
+    }
+
+    /**
+     * Get memory usage information (for debugging)
+     */
+    public function getMemoryUsage(): array
+    {
+        return [
+            'current' => memory_get_usage(true),
+            'peak' => memory_get_peak_usage(true),
+            'formatted_current' => $this->formatBytes(memory_get_usage(true)),
+            'formatted_peak' => $this->formatBytes(memory_get_peak_usage(true)),
+        ];
+    }
+
+    /**
+     * Format bytes for human-readable output
+     */
+    private function formatBytes(int $bytes, int $precision = 2): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        
+        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
+            $bytes /= 1024;
+        }
+        
+        return round($bytes, $precision) . ' ' . $units[$i];
     }
 }

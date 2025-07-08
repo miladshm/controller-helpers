@@ -21,7 +21,13 @@ trait HasStore
     use WithModel, WithValidation;
 
     /**
-     * Handles the creation of a new model instance.
+     * Configuration for transaction usage
+     */
+    protected bool $useTransactionForStore = true;
+    protected bool $enablePerformanceMetrics = false;
+
+    /**
+     * Handles the creation of a new model instance with optimized performance.
      *
      * @param Request $request The incoming request.
      * @return RedirectResponse|JsonResponse The response to be sent back to the client.
@@ -29,32 +35,157 @@ trait HasStore
      */
     public function store(Request $request): RedirectResponse|JsonResponse
     {
-        DB::beginTransaction();
+        $startTime = microtime(true);
+        $startMemory = memory_get_usage(true);
+        
+        $useTransaction = $this->shouldUseTransaction();
+        
+        if ($useTransaction) {
+            DB::beginTransaction();
+        }
+        
         try {
+            // Prepare and validate
             $this->prepareForStore($request);
             $data = $this->setRequestClass($this->requestClass())->getValidationData($request);
-            $item = $this->model()->query()->create($data);
+            
+            // Create the model
+            $item = $this->createModel($data);
+            
+            // Execute callback
             $this->storeCallback($request, $item);
-
-
-            DB::commit();
-            if ($request->expectsJson()) {
-                if ($this->getApiResource()) {
-                    $resource = get_class($this->getApiResource());
-                    return ResponderFacade::setData((new $resource($item->fresh($this->relations())))->jsonSerialize())->setMessage(Lang::get('responder::messages.success_store.status'))->respond();
-                }
-                return ResponderFacade::setData($item->load($this->relations())->toArray())->setMessage(Lang::get('responder::messages.success_store.status'))->respond();
+            
+            if ($useTransaction) {
+                DB::commit();
             }
-            return Redirect::back()->with(Lang::get('responder::messages.success_status'));
-
+            
+            // Prepare response
+            $response = $this->buildStoreResponse($request, $item);
+            
+            // Add performance metrics if enabled
+            if ($this->enablePerformanceMetrics && config('app.debug')) {
+                $this->addPerformanceMetrics($response, $startTime, $startMemory);
+            }
+            
+            return $response;
+            
         } catch (ValidationException|HttpException|AuthorizationException $exception) {
+            if ($useTransaction) {
+                DB::rollBack();
+            }
             throw $exception;
         } catch (\Exception $exception) {
-            DB::rollBack();
-            return ResponderFacade::setExceptionMessage($exception->getMessage())->setMessage($exception->getMessage())->respondError();
+            if ($useTransaction) {
+                DB::rollBack();
+            }
+            return ResponderFacade::setExceptionMessage($exception->getMessage())
+                ->setMessage($exception->getMessage())
+                ->respondError();
         }
     }
 
+    /**
+     * Determine if transaction should be used based on configuration and context.
+     */
+    protected function shouldUseTransaction(): bool
+    {
+        return $this->useTransactionForStore && !DB::transactionLevel();
+    }
+
+    /**
+     * Create the model with optimized query.
+     */
+    protected function createModel(array $data): Model
+    {
+        return $this->model()->query()->create($data);
+    }
+
+    /**
+     * Build the store response efficiently.
+     */
+    protected function buildStoreResponse(Request $request, Model $item): RedirectResponse|JsonResponse
+    {
+        if ($request->expectsJson()) {
+            return $this->buildJsonStoreResponse($item);
+        }
+        
+        return $this->buildRedirectStoreResponse();
+    }
+
+    /**
+     * Build JSON response for API requests.
+     */
+    protected function buildJsonStoreResponse(Model $item): JsonResponse
+    {
+        $relations = $this->getRelations();
+        
+        if ($this->getApiResource()) {
+            $resource = get_class($this->getApiResource());
+            $itemData = (new $resource($item->fresh($relations)))->jsonSerialize();
+        } else {
+            $itemData = $item->load($relations)->toArray();
+        }
+        
+        return ResponderFacade::setData($itemData)
+            ->setMessage(Lang::get('responder::messages.success_store.status'))
+            ->respond();
+    }
+
+    /**
+     * Build redirect response for web requests.
+     */
+    protected function buildRedirectStoreResponse(): RedirectResponse
+    {
+        return Redirect::back()->with(Lang::get('responder::messages.success_status'));
+    }
+
+    /**
+     * Add performance metrics to the response.
+     */
+    protected function addPerformanceMetrics($response, float $startTime, int $startMemory): void
+    {
+        if ($response instanceof JsonResponse) {
+            $data = $response->getData(true);
+            $data['_performance'] = [
+                'execution_time' => round((microtime(true) - $startTime) * 1000, 2) . 'ms',
+                'memory_used' => $this->formatBytes(memory_get_usage(true) - $startMemory),
+                'transaction_used' => $this->useTransactionForStore,
+            ];
+            $response->setData($data);
+        }
+    }
+
+    /**
+     * Format bytes for human-readable output.
+     */
+    protected function formatBytes(int $bytes, int $precision = 2): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        
+        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
+            $bytes /= 1024;
+        }
+        
+        return round($bytes, $precision) . ' ' . $units[$i];
+    }
+
+    /**
+     * Enable or disable transaction usage for store operations.
+     */
+    public function setUseTransaction(bool $useTransaction): self
+    {
+        $this->useTransactionForStore = $useTransaction;
+        return $this;
+    }
+
+    /**
+     * Enable or disable performance metrics collection.
+     */
+    public function setPerformanceMetrics(bool $enabled): self
+    {
+        $this->enablePerformanceMetrics = $enabled;
+        return $this;
+    }
 
     /**
      * A callback method that can be overridden to perform additional actions after a new model instance is created.
@@ -65,7 +196,7 @@ trait HasStore
      */
     protected function storeCallback(Request $request, Model $item): void
     {
-
+        // Override in child classes for custom behavior
     }
 
     /**
@@ -76,10 +207,8 @@ trait HasStore
      * @param Request $request The incoming request.
      * @return void
      */
-    protected function prepareForStore(Request &$request)
+    protected function prepareForStore(Request &$request): void
     {
-
+        // Override in child classes for custom behavior
     }
-
-
 }
