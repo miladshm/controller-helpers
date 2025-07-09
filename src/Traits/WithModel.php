@@ -14,13 +14,14 @@ trait WithModel
     /**
      * @var array|string[]
      */
-    private static array $columns = ['*'];
+    private array $columns = ['*'];
 
     /**
-     * Retrieves a single item based on the provided ID.
+     * Retrieves a single item based on the provided ID with optimized query building.
      *
      * @param int|string $id The ID of the item to retrieve.
      * @param bool $withTrashed If true, includes soft-deleted items in the result.
+     * @param bool $withFilters If true, applies filters to the query.
      * @return array|Builder|Builder[]|Collection|Model|HigherOrderWhenProxy|HigherOrderWhenProxy[]|null
      *     The retrieved item or null if not found.
      */
@@ -31,32 +32,112 @@ trait WithModel
     }
 
     /**
-     * Builds and returns a query builder for the model.
+     * Builds and returns an optimized query builder for the model.
      *
      * @param bool $withTrashed If true, includes soft-deleted items in the query.
+     * @param bool $withFilters If true, applies filters to the query.
      * @return Builder The query builder for the model.
      */
     private function query(bool $withTrashed = false, bool $withFilters = true): Builder
     {
-        // Initialize the query builder
-        return $this->model()->query()
-            // Select the specified columns
-            ->select($this->getColumns())
-            // Include soft-deleted items if applicable
-            ->when(
-                $withTrashed && method_exists($this->model(), 'withTrashed'),
-                fn(Builder $q) => $q->withTrashed()
-            )
-            // Apply filters to the query
-            ->when($withFilters, fn($q) => $this->filters($q))
-            // Eager load specified relations
-            ->when(count($this->getRelations()), function ($q) {
-                $q->with($this->getRelations());
-            })
-            // Eager load specified relations
-            ->when(count($this->getCounts()), function ($q) {
-                $q->withCount($this->getCounts());
-            });
+        $query = $this->model()->query();
+
+        // Select specific columns for better performance
+        $columns = $this->getColumns();
+        if (!empty($columns) && $columns !== ['*']) {
+            $query->select($columns);
+        }
+
+        // Apply soft delete handling efficiently
+        if ($withTrashed && $this->modelSupportsSoftDeletes()) {
+            $query->withTrashed();
+        }
+
+        // Apply filters when requested
+        if ($withFilters) {
+            $query = $this->filters($query) ?? $query;
+        }
+
+        // Eager load relations efficiently
+        $relations = $this->getRelations();
+        if (!empty($relations)) {
+            $query->with($relations);
+        }
+
+        // Eager load counts efficiently
+        $counts = $this->getCounts();
+        if (!empty($counts)) {
+            $query->withCount($counts);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Check if the model supports soft deletes using caching.
+     */
+    private function modelSupportsSoftDeletes(): bool
+    {
+        static $softDeleteCache = [];
+
+        $modelClass = get_class($this->model());
+
+        if (!isset($softDeleteCache[$modelClass])) {
+            $softDeleteCache[$modelClass] = method_exists($this->model(), 'withTrashed');
+        }
+
+        return $softDeleteCache[$modelClass];
+    }
+
+    /**
+     * Optimized method to get multiple items with optional conditions.
+     *
+     * @param array $conditions
+     * @param bool $withTrashed
+     * @param int|null $limit
+     * @return Collection
+     */
+    protected function getItems(array $conditions = [], bool $withTrashed = false, ?int $limit = null): Collection
+    {
+        $query = $this->query($withTrashed);
+
+        // Apply conditions efficiently
+        foreach ($conditions as $column => $value) {
+            if (is_array($value)) {
+                $query->whereIn($column, $value);
+            } else {
+                $query->where($column, $value);
+            }
+        }
+
+        // Apply limit if specified
+        if ($limit !== null) {
+            $query->limit($limit);
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * Check if a record exists with optimized query.
+     *
+     * @param array $conditions
+     * @param bool $withTrashed
+     * @return bool
+     */
+    protected function recordExists(array $conditions, bool $withTrashed = false): bool
+    {
+        $query = $this->model()->query();
+
+        if ($withTrashed && $this->modelSupportsSoftDeletes()) {
+            $query->withTrashed();
+        }
+
+        foreach ($conditions as $column => $value) {
+            $query->where($column, $value);
+        }
+
+        return $query->exists();
     }
 
     /**
@@ -67,12 +148,67 @@ trait WithModel
     abstract private function model(): Model;
 
     /**
-     * Retrieves the columns to be retrieved.
+     * Retrieves the columns to be retrieved with better memory management.
      *
      * @return array|string[] An array of column names to be retrieved.
      */
     public function getColumns(): array
     {
-        return static::$columns;
+        return $this->columns;
+    }
+
+    /**
+     * Set columns to be selected (instance method instead of static).
+     *
+     * @param array $columns
+     * @return self
+     */
+    public function setColumns(array $columns): self
+    {
+        $this->columns = $columns;
+        return $this;
+    }
+
+    /**
+     * Reset columns to default.
+     *
+     * @return self
+     */
+    public function resetColumns(): self
+    {
+        $this->columns = ['*'];
+        return $this;
+    }
+
+    /**
+     * Add columns to the existing selection.
+     *
+     * @param array $columns
+     * @return self
+     */
+    public function addColumns(array $columns): self
+    {
+        if ($this->columns === ['*']) {
+            $this->columns = $columns;
+        } else {
+            $this->columns = array_unique(array_merge($this->columns, $columns));
+        }
+        return $this;
+    }
+
+    /**
+     * Get query performance metrics (for debugging).
+     *
+     * @return array
+     */
+    public function getQueryMetrics(): array
+    {
+        return [
+            'columns_count' => count($this->getColumns()),
+            'relations_count' => count($this->getRelations()),
+            'counts_count' => count($this->getCounts()),
+            'memory_usage' => memory_get_usage(true),
+            'memory_peak' => memory_get_peak_usage(true),
+        ];
     }
 }

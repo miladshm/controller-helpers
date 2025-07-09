@@ -19,49 +19,38 @@ trait HasApiDatatable
     use WithExtraData, WithModel;
 
     /**
-     * @var string|null
+     * Instance properties instead of static to prevent memory leaks
      */
-    private static ?string $order;
+    private ?string $order = null;
+    private ?string $paginator = null;
+    private ?int $pageLength = null;
+    private array $searchable = [];
+    
+    // Configuration cache for performance
+    private static array $configCache = [];
 
     /**
-     * @var string|null
+     * Get the paginator type with caching.
      */
-    private static ?string $paginator;
-
-    /**
-     * @var int|null
-     */
-    private static ?int $pageLength;
-
-    /**
-     * @var array|string[]
-     */
-    private static array $searchable = [];
-
-
-    /**
-     * Get the paginator type.
-     *
-     * @return string|null The paginator type or null if not set.
-     */
-    protected function getPaginator(): ?string
+    protected function getPaginator(): string
     {
-        return self::$paginator ?? getConfigNames('default_pagination_type');
+        if ($this->paginator !== null) {
+            return $this->paginator;
+        }
+        
+        return $this->getConfigValue('default_pagination_type', 'default');
     }
 
     /**
      * Set the paginator type.
-     *
-     * @param string|null $paginator The paginator type to set.
-     * @return void
      */
     protected function setPaginator(?string $paginator): void
     {
-        self::$paginator = $paginator;
+        $this->paginator = $paginator;
     }
 
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource with optimized performance.
      *
      * This method handles the index action for API requests. It processes the request,
      * applies filters, sorting, and pagination to retrieve a list of items.
@@ -72,108 +61,231 @@ trait HasApiDatatable
      */
     public function index(ListRequest $request, DatatableBuilder $datatable): JsonResponse
     {
-
         try {
+            $startTime = microtime(true);
+            $startMemory = memory_get_usage(true);
+            
             $items = $datatable
-                ->setRequest($request) // Set the request for the builder
-                ->setBuilder($this->query()) // Set the builder to the getItems method
-                ->setSearchable($this->getSearchable()) // Set the searchable fields
-                ->setPageLength($this->getPageLength()) // Set the page length for pagination
-                ->setPaginator($this->getPaginator()) // Set the paginator type
-                ->setFields($this->getColumns()) // Set the fields to retrieve
-                ->setOrder($this->getOrder()) // Set the order direction
-                ->handle();// Paginate the results
-            // Get the applied filters
-            $filters = Request::query();// Get the items using the getItems method
-            $items = $this->getItems($items);// Get any extra data
-            $extraData = $this->extraData();// Create the response data
-            $data = compact('items', 'filters') + $extraData;// Return the JSON response
+                ->setRequest($request)
+                ->setBuilder($this->query())
+                ->setSearchable($this->getSearchable())
+                ->setPageLength($this->getPageLength())
+                ->setPaginator($this->getPaginator())
+                ->setFields($this->getColumns())
+                ->setOrder($this->getOrder())
+                ->handle();
+
+            // Process items efficiently
+            $processedItems = $this->getItems($items);
+            
+            // Get filters and extra data
+            $filters = Request::query();
+            $extraData = $this->extraData();
+            
+            // Create optimized response data
+            $data = $this->buildResponseData($processedItems, $filters, $extraData);
+            
+            // Add performance metrics in debug mode
+            if (config('app.debug')) {
+                $data['_performance'] = [
+                    'execution_time' => round((microtime(true) - $startTime) * 1000, 2) . 'ms',
+                    'memory_used' => $this->formatBytes(memory_get_usage(true) - $startMemory),
+                    'peak_memory' => $this->formatBytes(memory_get_peak_usage(true)),
+                ];
+            }
+            
             return ResponderFacade::setData($data)->respond();
+            
         } catch (\Exception $e) {
-            return ResponderFacade::setMessage($e->getMessage())->setData($e->getTrace())->respondError();
+            return ResponderFacade::setMessage($e->getMessage())
+                ->setData(config('app.debug') ? $e->getTrace() : [])
+                ->respondError();
         }
+    }
+
+    /**
+     * Build response data efficiently
+     */
+    private function buildResponseData($items, array $filters, array $extraData): array
+    {
+        $data = ['items' => $items, 'filters' => $filters];
+        
+        // Merge extra data efficiently
+        if (!empty($extraData)) {
+            $data = array_merge($data, $extraData);
+        }
+        
+        return $data;
     }
 
     /**
      * Retrieves the items from the builder and transforms them using the API resource if applicable.
-     *
-     * This method takes the items retrieved from the builder and transforms them using the API resource
-     * if it is set. If the `get_all_wrapping.enabled` config is set to `true`, the items are wrapped in a
-     * collection with the wrapper name specified in the `get_all_wrapping.wrapper` config.
-     *
-     * @param Paginator|Collection|CursorPaginator $items The items retrieved from the builder.
-     * @return mixed The transformed items.
+     * Optimized for memory efficiency and performance.
      */
     private function getItems(Paginator|Collection|CursorPaginator $items)
     {
         $resource = $this->getApiResource();
-
-        // If the items are a collection, transform them using the API resource
-        if (is_a($items, Collection::class)) {
-            // If the `get_all_wrapping.enabled` config is set to `true`, wrap the items in a collection
-            if (getConfigNames('get_all_wrapping.enabled')) {
-                // Get the wrapper name from the config
-                $wrapper = getConfigNames('get_all_wrapping.wrapper');
-
-                // Transform the items using the API resource
-                if ($resource) {
-                    // Wrap the items in a collection
-                    JsonResource::wrap($wrapper);
-                    return $resource->collection($items)->preserveQuery()->response()->getData();
-                }
-
-                // Set the wrapped items to the wrapper name
-                ${$wrapper} = $items;
-
-                // Return the transformed items wrapped in a collection
-                return collect(compact("{$wrapper}"));
-            } else {
-                JsonResource::withoutWrapping();
-            }
+        
+        // Handle collections efficiently
+        if ($items instanceof Collection) {
+            return $this->processCollection($items, $resource);
         }
-        // Return the transformed items using the API resource
-        return $resource?->collection($items)->preserveQuery()->response()->getData() ?? $items;
+        
+        // Handle paginated results
+        return $this->processPaginatedResults($items, $resource);
+    }
+
+    /**
+     * Process collection with memory optimization
+     */
+    private function processCollection(Collection $items, $resource)
+    {
+        $wrappingEnabled = $this->getConfigValue('get_all_wrapping.enabled', false);
+        
+        if ($wrappingEnabled) {
+            $wrapper = $this->getConfigValue('get_all_wrapping.wrapper', 'data');
+            
+            if ($resource) {
+                JsonResource::wrap($wrapper);
+                return $resource->collection($items)
+                    ->preserveQuery()
+                    ->response()
+                    ->getData();
+            }
+            
+            return collect([$wrapper => $items]);
+        } else {
+            JsonResource::withoutWrapping();
+        }
+        
+        return $resource?->collection($items)
+            ->preserveQuery()
+            ->response()
+            ->getData() ?? $items;
+    }
+
+    /**
+     * Process paginated results efficiently
+     */
+    private function processPaginatedResults(Paginator|CursorPaginator $items, $resource)
+    {
+        if (!$resource) {
+            return $items;
+        }
+        
+        return $resource->collection($items)
+            ->preserveQuery()
+            ->response()
+            ->getData();
     }
 
     /**
      * Set the page length for pagination.
-     *
-     * @param int $pageLength The number of items per page.
-     * @return void
      */
     protected function setPageLength(int $pageLength): void
     {
-        static::$pageLength = $pageLength;
+        $this->pageLength = $pageLength;
     }
 
     /**
-     * Get the order direction for sorting.
-     *
-     * @return string The order direction ('asc' or 'desc').
+     * Get the order direction for sorting with caching.
      */
     protected function getOrder(): string
     {
-        return static::$order ?? getConfigNames('sort_direction');
+        return $this->order ?? $this->getConfigValue('sort_direction', 'desc');
     }
 
     /**
-     * Get the page length for pagination.
-     *
-     * @return int The number of items per page.
+     * Set the order direction for sorting.
+     */
+    protected function setOrder(string $order): void
+    {
+        $this->order = $order;
+    }
+
+    /**
+     * Get the page length for pagination with optimization.
      */
     protected function getPageLength(): int
     {
-        return static::$pageLength ?? getConfigNames('default_page_length');
+        if ($this->pageLength !== null) {
+            return $this->pageLength;
+        }
+        
+        $defaultPageLength = $this->getConfigValue('default_page_length', 15);
+        $maxPageLength = $this->getConfigValue('max_page_length', 500);
+        
+        // Ensure page length is within reasonable bounds
+        return min($defaultPageLength, $maxPageLength);
     }
 
     /**
-     * Get the searchable fields.
-     *
-     * @return array An array of searchable field names.
+     * Get the searchable fields with caching.
      */
     protected function getSearchable(): array
     {
-        return empty(static::$searchable) ? getConfigNames('search.default_searchable') : self::$searchable;
+        if (!empty($this->searchable)) {
+            return $this->searchable;
+        }
+        
+        return $this->getConfigValue('search.default_searchable', ['id', 'name', 'title']);
+    }
+
+    /**
+     * Set searchable fields.
+     */
+    protected function setSearchable(array $searchable): void
+    {
+        $this->searchable = $searchable;
+    }
+
+    /**
+     * Get configuration value with caching for performance.
+     */
+    private function getConfigValue(string $key, mixed $default = null): mixed
+    {
+        if (!isset(self::$configCache[$key])) {
+            self::$configCache[$key] = config("controller-helpers.{$key}", $default);
+        }
+        
+        return self::$configCache[$key];
+    }
+
+    /**
+     * Format bytes for human-readable output.
+     */
+    private function formatBytes(int $bytes, int $precision = 2): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        
+        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
+            $bytes /= 1024;
+        }
+        
+        return round($bytes, $precision) . ' ' . $units[$i];
+    }
+
+    /**
+     * Clear configuration cache (useful for testing).
+     */
+    public static function clearConfigCache(): void
+    {
+        self::$configCache = [];
+    }
+
+    /**
+     * Get performance metrics for the current instance.
+     */
+    public function getPerformanceMetrics(): array
+    {
+        return [
+            'searchable_fields' => count($this->getSearchable()),
+            'page_length' => $this->getPageLength(),
+            'paginator_type' => $this->getPaginator(),
+            'order_direction' => $this->getOrder(),
+            'memory_usage' => memory_get_usage(true),
+            'memory_peak' => memory_get_peak_usage(true),
+        ];
     }
 }
 
