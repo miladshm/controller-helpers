@@ -8,6 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Number;
 use Miladshm\ControllerHelpers\Http\Requests\ListRequest;
 use Miladshm\ControllerHelpers\Libraries\DataTableBuilder\DatatableBuilder;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
@@ -25,7 +26,7 @@ trait HasApiDatatable
     private ?string $paginator = null;
     private ?int $pageLength = null;
     private array $searchable = [];
-    
+
     // Configuration cache for performance
     private static array $configCache = [];
 
@@ -37,7 +38,7 @@ trait HasApiDatatable
         if ($this->paginator !== null) {
             return $this->paginator;
         }
-        
+
         return $this->getConfigValue('default_pagination_type', 'default');
     }
 
@@ -64,7 +65,7 @@ trait HasApiDatatable
         try {
             $startTime = microtime(true);
             $startMemory = memory_get_usage(true);
-            
+
             $items = $datatable
                 ->setRequest($request)
                 ->setBuilder($this->query())
@@ -77,14 +78,14 @@ trait HasApiDatatable
 
             // Process items efficiently
             $processedItems = $this->getItems($items);
-            
+
             // Get filters and extra data
             $filters = Request::query();
             $extraData = $this->extraData();
-            
+
             // Create optimized response data
             $data = $this->buildResponseData($processedItems, $filters, $extraData);
-            
+
             // Add performance metrics in debug mode
             if (config('app.debug')) {
                 $data['_performance'] = [
@@ -93,9 +94,9 @@ trait HasApiDatatable
                     'peak_memory' => $this->formatBytes(memory_get_peak_usage(true)),
                 ];
             }
-            
+
             return ResponderFacade::setData($data)->respond();
-            
+
         } catch (\Exception $e) {
             return ResponderFacade::setMessage($e->getMessage())
                 ->setData(config('app.debug') ? $e->getTrace() : [])
@@ -109,12 +110,12 @@ trait HasApiDatatable
     private function buildResponseData($items, array $filters, array $extraData): array
     {
         $data = ['items' => $items, 'filters' => $filters];
-        
+
         // Merge extra data efficiently
         if (!empty($extraData)) {
             $data = array_merge($data, $extraData);
         }
-        
+
         return $data;
     }
 
@@ -125,12 +126,12 @@ trait HasApiDatatable
     private function getItems(Paginator|Collection|CursorPaginator $items)
     {
         $resource = $this->getApiResource();
-        
+
         // Handle collections efficiently
         if ($items instanceof Collection) {
             return $this->processCollection($items, $resource);
         }
-        
+
         // Handle paginated results
         return $this->processPaginatedResults($items, $resource);
     }
@@ -141,10 +142,10 @@ trait HasApiDatatable
     private function processCollection(Collection $items, $resource)
     {
         $wrappingEnabled = $this->getConfigValue('get_all_wrapping.enabled', false);
-        
+
         if ($wrappingEnabled) {
             $wrapper = $this->getConfigValue('get_all_wrapping.wrapper', 'data');
-            
+
             if ($resource) {
                 JsonResource::wrap($wrapper);
                 return $resource->collection($items)
@@ -152,12 +153,12 @@ trait HasApiDatatable
                     ->response()
                     ->getData();
             }
-            
+
             return collect([$wrapper => $items]);
         } else {
             JsonResource::withoutWrapping();
         }
-        
+
         return $resource?->collection($items)
             ->preserveQuery()
             ->response()
@@ -172,7 +173,7 @@ trait HasApiDatatable
         if (!$resource) {
             return $items;
         }
-        
+
         return $resource->collection($items)
             ->preserveQuery()
             ->response()
@@ -211,10 +212,10 @@ trait HasApiDatatable
         if ($this->pageLength !== null) {
             return $this->pageLength;
         }
-        
+
         $defaultPageLength = $this->getConfigValue('default_page_length', 15);
         $maxPageLength = $this->getConfigValue('max_page_length', 500);
-        
+
         // Ensure page length is within reasonable bounds
         return min($defaultPageLength, $maxPageLength);
     }
@@ -227,7 +228,7 @@ trait HasApiDatatable
         if (!empty($this->searchable)) {
             return $this->searchable;
         }
-        
+
         return $this->getConfigValue('search.default_searchable', ['id', 'name', 'title']);
     }
 
@@ -247,22 +248,8 @@ trait HasApiDatatable
         if (!isset(self::$configCache[$key])) {
             self::$configCache[$key] = config("controller-helpers.{$key}", $default);
         }
-        
-        return self::$configCache[$key];
-    }
 
-    /**
-     * Format bytes for human-readable output.
-     */
-    private function formatBytes(int $bytes, int $precision = 2): string
-    {
-        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        
-        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
-            $bytes /= 1024;
-        }
-        
-        return round($bytes, $precision) . ' ' . $units[$i];
+        return self::$configCache[$key];
     }
 
     /**

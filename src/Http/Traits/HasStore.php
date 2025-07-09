@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Number;
 use Illuminate\Validation\ValidationException;
 use Miladshm\ControllerHelpers\Libraries\Responder\Facades\ResponderFacade;
 use Miladshm\ControllerHelpers\Traits\WithModel;
@@ -37,38 +38,38 @@ trait HasStore
     {
         $startTime = microtime(true);
         $startMemory = memory_get_usage(true);
-        
+
         $useTransaction = $this->shouldUseTransaction();
-        
+
         if ($useTransaction) {
             DB::beginTransaction();
         }
-        
+
         try {
             // Prepare and validate
             $this->prepareForStore($request);
             $data = $this->setRequestClass($this->requestClass())->getValidationData($request);
-            
+
             // Create the model
             $item = $this->createModel($data);
-            
+
             // Execute callback
             $this->storeCallback($request, $item);
-            
+
             if ($useTransaction) {
                 DB::commit();
             }
-            
+
             // Prepare response
             $response = $this->buildStoreResponse($request, $item);
-            
+
             // Add performance metrics if enabled
             if ($this->enablePerformanceMetrics && config('app.debug')) {
                 $this->addPerformanceMetrics($response, $startTime, $startMemory);
             }
-            
+
             return $response;
-            
+
         } catch (ValidationException|HttpException|AuthorizationException $exception) {
             if ($useTransaction) {
                 DB::rollBack();
@@ -108,7 +109,7 @@ trait HasStore
         if ($request->expectsJson()) {
             return $this->buildJsonStoreResponse($item);
         }
-        
+
         return $this->buildRedirectStoreResponse();
     }
 
@@ -118,14 +119,14 @@ trait HasStore
     protected function buildJsonStoreResponse(Model $item): JsonResponse
     {
         $relations = $this->getRelations();
-        
+
         if ($this->getApiResource()) {
             $resource = get_class($this->getApiResource());
             $itemData = (new $resource($item->fresh($relations)))->jsonSerialize();
         } else {
             $itemData = $item->load($relations)->toArray();
         }
-        
+
         return ResponderFacade::setData($itemData)
             ->setMessage(Lang::get('responder::messages.success_store.status'))
             ->respond();
@@ -148,25 +149,11 @@ trait HasStore
             $data = $response->getData(true);
             $data['_performance'] = [
                 'execution_time' => round((microtime(true) - $startTime) * 1000, 2) . 'ms',
-                'memory_used' => $this->formatBytes(memory_get_usage(true) - $startMemory),
+                'memory_used' => Number::fileSize(memory_get_usage(true) - $startMemory),
                 'transaction_used' => $this->useTransactionForStore,
             ];
             $response->setData($data);
         }
-    }
-
-    /**
-     * Format bytes for human-readable output.
-     */
-    protected function formatBytes(int $bytes, int $precision = 2): string
-    {
-        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        
-        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
-            $bytes /= 1024;
-        }
-        
-        return round($bytes, $precision) . ' ' . $units[$i];
     }
 
     /**

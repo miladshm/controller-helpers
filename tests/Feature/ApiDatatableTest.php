@@ -86,7 +86,6 @@ class ApiDatatableTest extends TestCase
 
         $response = $this->getJson('/testing?all=1');
 
-
         $response->assertSuccessful();
         $response->assertJsonStructure(getConfigNames('response.field_names'));
         $response->assertJsonIsObject(getConfigNames('response.field_names.data'));
