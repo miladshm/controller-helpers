@@ -41,35 +41,35 @@ trait WithModel
     private function query(bool $withTrashed = false, bool $withFilters = true): Builder
     {
         $query = $this->model()->query();
-        
+
         // Select specific columns for better performance
         $columns = $this->getColumns();
         if (!empty($columns) && $columns !== ['*']) {
             $query->select($columns);
         }
-        
+
         // Apply soft delete handling efficiently
         if ($withTrashed && $this->modelSupportsSoftDeletes()) {
             $query->withTrashed();
         }
-        
+
         // Apply filters when requested
         if ($withFilters) {
             $query = $this->filters($query) ?? $query;
         }
-        
+
         // Eager load relations efficiently
         $relations = $this->getRelations();
         if (!empty($relations)) {
             $query->with($relations);
         }
-        
+
         // Eager load counts efficiently
         $counts = $this->getCounts();
         if (!empty($counts)) {
             $query->withCount($counts);
         }
-        
+
         return $query;
     }
 
@@ -79,13 +79,13 @@ trait WithModel
     private function modelSupportsSoftDeletes(): bool
     {
         static $softDeleteCache = [];
-        
+
         $modelClass = get_class($this->model());
-        
+
         if (!isset($softDeleteCache[$modelClass])) {
             $softDeleteCache[$modelClass] = method_exists($this->model(), 'withTrashed');
         }
-        
+
         return $softDeleteCache[$modelClass];
     }
 
@@ -100,7 +100,7 @@ trait WithModel
     protected function getItems(array $conditions = [], bool $withTrashed = false, ?int $limit = null): Collection
     {
         $query = $this->query($withTrashed);
-        
+
         // Apply conditions efficiently
         foreach ($conditions as $column => $value) {
             if (is_array($value)) {
@@ -109,44 +109,13 @@ trait WithModel
                 $query->where($column, $value);
             }
         }
-        
+
         // Apply limit if specified
         if ($limit !== null) {
             $query->limit($limit);
         }
-        
-        return $query->get();
-    }
 
-    /**
-     * Get a count of records with optimized query.
-     *
-     * @param array $conditions
-     * @param bool $withTrashed
-     * @return int
-     */
-    protected function getCount(array $conditions = [], bool $withTrashed = false): int
-    {
-        $query = $this->model()->query();
-        
-        // Only apply necessary parts for counting
-        if ($withTrashed && $this->modelSupportsSoftDeletes()) {
-            $query->withTrashed();
-        }
-        
-        // Apply conditions
-        foreach ($conditions as $column => $value) {
-            if (is_array($value)) {
-                $query->whereIn($column, $value);
-            } else {
-                $query->where($column, $value);
-            }
-        }
-        
-        // Apply filters for count
-        $query = $this->filters($query) ?? $query;
-        
-        return $query->count();
+        return $query->get();
     }
 
     /**
@@ -159,15 +128,15 @@ trait WithModel
     protected function recordExists(array $conditions, bool $withTrashed = false): bool
     {
         $query = $this->model()->query();
-        
+
         if ($withTrashed && $this->modelSupportsSoftDeletes()) {
             $query->withTrashed();
         }
-        
+
         foreach ($conditions as $column => $value) {
             $query->where($column, $value);
         }
-        
+
         return $query->exists();
     }
 
