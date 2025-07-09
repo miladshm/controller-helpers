@@ -97,7 +97,7 @@ trait WithModel
      * @param int|null $limit
      * @return Collection
      */
-    protected function getItems(array $conditions = [], bool $withTrashed = false, ?int $limit = null): Collection
+    protected function getCollection(array $conditions = [], bool $withTrashed = false, ?int $limit = null): Collection
     {
         $query = $this->query($withTrashed);
 
