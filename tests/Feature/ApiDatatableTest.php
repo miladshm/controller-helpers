@@ -54,7 +54,7 @@ class ApiDatatableTest extends TestCase
 
     public function test_datatable_response_page_length()
     {
-        $query = Arr::query([getConfigNames('params.page_length') => $length = fake()->randomNumber(3)]);
+        $query = Arr::query([getConfigNames('params.page_length') => $length = min(fake()->randomNumber(3), getConfigNames('performance.max_page_length'))]);
         $response = $this->get("/testing?$query");
 
         $response->assertSuccessful();

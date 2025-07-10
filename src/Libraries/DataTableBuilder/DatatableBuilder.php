@@ -24,7 +24,7 @@ class DatatableBuilder
     private ?string $order;
     private ?array $searchable;
     private ?string $paginator;
-    
+
     // Performance optimization: cache frequently accessed values
     private static array $configCache = [];
     private ?array $resolvedSearchable = null;
@@ -57,7 +57,7 @@ class DatatableBuilder
     {
         // For large datasets, add memory-efficient handling
         $maxRecords = $this->getConfigValue('max_records_without_pagination', 10000);
-        
+
         // Use query chunking for very large datasets
         if ($builder->count() > $maxRecords) {
             $results = collect();
@@ -66,7 +66,7 @@ class DatatableBuilder
             });
             return $results;
         }
-        
+
         return $builder->get();
     }
 
@@ -77,7 +77,7 @@ class DatatableBuilder
     {
         $pageLength = $this->getPageLength();
         $method = $this->getPaginatorMethodName();
-        
+
         return $builder
             ->{$method}($pageLength)
             ->withQueryString();
@@ -93,10 +93,10 @@ class DatatableBuilder
         }
 
         $searchableParam = $this->getConfigValue('params.searchable_columns');
-        $this->resolvedSearchable = $this->request->{$searchableParam} 
-            ?? $this->searchable 
+        $this->resolvedSearchable = $this->request->{$searchableParam}
+            ?? $this->searchable
             ?? $this->getConfigValue('search.default_searchable', []);
-            
+
         return $this->resolvedSearchable;
     }
 
@@ -148,7 +148,7 @@ class DatatableBuilder
         if ($this->resolvedPaginator !== null) {
             return $this->resolvedPaginator;
         }
-        
+
         $this->resolvedPaginator = $this->paginator ?? $this->getConfigValue('default_pagination_type', 'default');
         return $this->resolvedPaginator;
     }
@@ -173,16 +173,16 @@ class DatatableBuilder
         }
 
         $pageLengthParam = $this->getConfigValue('params.page_length');
-        $this->resolvedPageLength = $this->request->{$pageLengthParam} 
-            ?? $this->pageLength 
+        $this->resolvedPageLength = $this->request->{$pageLengthParam}
+            ?? $this->pageLength
             ?? $this->getConfigValue('default_page_length', 15);
-            
+
         // Add reasonable limits to prevent memory issues
         $maxPageLength = $this->getConfigValue('max_page_length', 500);
         if ($this->resolvedPageLength > $maxPageLength) {
             $this->resolvedPageLength = $maxPageLength;
         }
-        
+
         return $this->resolvedPageLength;
     }
 
@@ -242,11 +242,7 @@ class DatatableBuilder
      */
     private function getConfigValue(string $key, mixed $default = null): mixed
     {
-        if (!isset(self::$configCache[$key])) {
-            self::$configCache[$key] = config("controller-helpers.{$key}", $default);
-        }
-        
-        return self::$configCache[$key];
+        return config("controller-helpers.{$key}", $default);
     }
 
     /**
@@ -257,32 +253,5 @@ class DatatableBuilder
         self::$configCache = [];
         SearchFilter::clearCache();
         SortFilter::clearCache();
-    }
-
-    /**
-     * Get memory usage information (for debugging)
-     */
-    public function getMemoryUsage(): array
-    {
-        return [
-            'current' => memory_get_usage(true),
-            'peak' => memory_get_peak_usage(true),
-            'formatted_current' => $this->formatBytes(memory_get_usage(true)),
-            'formatted_peak' => $this->formatBytes(memory_get_peak_usage(true)),
-        ];
-    }
-
-    /**
-     * Format bytes for human-readable output
-     */
-    private function formatBytes(int $bytes, int $precision = 2): string
-    {
-        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        
-        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
-            $bytes /= 1024;
-        }
-        
-        return round($bytes, $precision) . ' ' . $units[$i];
     }
 }

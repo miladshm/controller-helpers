@@ -44,7 +44,7 @@ class WithApiResourceTest extends TestCase
 
         $result = $this->getApiResource();
 
-        $this->assertSame($result->toJson(), (new TestModelResource($this->model()))->toJson());
+        $this->assertSame($result?->toJson(), (new TestModelResource($this->model()))->toJson());
     }
 
 

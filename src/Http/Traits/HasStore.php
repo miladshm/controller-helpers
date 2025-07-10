@@ -25,7 +25,7 @@ trait HasStore
      * Configuration for transaction usage
      */
     protected bool $useTransactionForStore = true;
-    protected bool $enablePerformanceMetrics = false;
+    protected bool $enablePerformanceMetrics = true;
 
     /**
      * Handles the creation of a new model instance with optimized performance.

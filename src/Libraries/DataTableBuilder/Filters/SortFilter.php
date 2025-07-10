@@ -27,7 +27,7 @@ class SortFilter
      * @param callable $next The next filter in the pipeline.
      * @return Builder The modified query builder.
      */
-    public function __invoke(Builder $builder, $next): Builder
+    public function __invoke(Builder $builder, callable $next)
     {
         $sortParam = $this->getConfigValue('params.sort');
 
@@ -48,11 +48,11 @@ class SortFilter
     private function applyCustomSort(Builder $builder, string $sortParam): void
     {
         $sortData = $this->request->input($sortParam);
-        
+
         if (is_array($sortData) && isset($sortData['column'])) {
             $column = $sortData['column'];
             $direction = $sortData['dir'] ?? $this->order;
-            
+
             // Validate column exists before applying sort
             if ($this->hasColumn($builder, $column)) {
                 $builder->orderBy($builder->qualifyColumn($column), $direction);
@@ -66,7 +66,7 @@ class SortFilter
     private function applyDefaultSort(Builder $builder): void
     {
         $orderColumn = $this->getConfigValue('order_column');
-        
+
         if ($this->hasColumn($builder, $orderColumn)) {
             $builder->orderBy($builder->qualifyColumn($orderColumn), $this->order);
         }
@@ -80,12 +80,12 @@ class SortFilter
         $table = $builder->getModel()->getTable();
         $connection = $builder->getModel()->getConnectionName();
         $cacheKey = ($connection ?? 'default') . '.' . $table . '.' . $column;
-        
+
         if (!isset(self::$schemaCache[$cacheKey])) {
             self::$schemaCache[$cacheKey] = Schema::connection($connection)
                 ->hasColumn($table, $column);
         }
-        
+
         return self::$schemaCache[$cacheKey];
     }
 
@@ -94,13 +94,8 @@ class SortFilter
      */
     private function getConfigValue(string $key): mixed
     {
-        static $configCache = [];
-        
-        if (!isset($configCache[$key])) {
-            $configCache[$key] = config("controller-helpers.{$key}");
-        }
-        
-        return $configCache[$key];
+        return config("controller-helpers.{$key}");
+
     }
 
     /**

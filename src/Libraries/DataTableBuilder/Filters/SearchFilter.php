@@ -31,7 +31,7 @@ class SearchFilter
     {
         $searchParameter = $this->getConfigValue('params.search');
         $q = $this->request->{$searchParameter};
-        
+
         // Early return if no search query
         if (!$this->request->filled($searchParameter) || empty($this->searchable)) {
             return $next($builder);
@@ -77,7 +77,7 @@ class SearchFilter
             $query->orWhereHas($rel, function (Builder $subQuery) use ($column, $searchTerm) {
                 $relatedTable = $subQuery->getModel()->getTable();
                 $relatedConnection = $subQuery->getModel()->getConnectionName();
-                
+
                 // Check if column exists in related table using cache
                 if ($this->hasColumn($relatedTable, $column, $relatedConnection)) {
                     $subQuery->where($column, 'LIKE', "%{$searchTerm}%");
@@ -102,12 +102,12 @@ class SearchFilter
     private function hasColumn(string $table, string $column, ?string $connection = null): bool
     {
         $cacheKey = ($connection ?? 'default') . '.' . $table . '.' . $column;
-        
+
         if (!isset(self::$schemaCache[$cacheKey])) {
             self::$schemaCache[$cacheKey] = Schema::connection($connection)
                 ->hasColumn($table, $column);
         }
-        
+
         return self::$schemaCache[$cacheKey];
     }
 
@@ -117,11 +117,11 @@ class SearchFilter
     private function hasRelationship(string $modelClass, string $relationName): bool
     {
         $cacheKey = $modelClass . '.' . $relationName;
-        
+
         if (!isset(self::$relationCache[$cacheKey])) {
             self::$relationCache[$cacheKey] = method_exists($modelClass, $relationName);
         }
-        
+
         return self::$relationCache[$cacheKey];
     }
 
@@ -131,11 +131,11 @@ class SearchFilter
     private function getConfigValue(string $key): mixed
     {
         static $configCache = [];
-        
+
         if (!isset($configCache[$key])) {
             $configCache[$key] = config("controller-helpers.{$key}");
         }
-        
+
         return $configCache[$key];
     }
 

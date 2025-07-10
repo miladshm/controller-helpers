@@ -90,8 +90,8 @@ trait HasApiDatatable
             if (config('app.debug')) {
                 $data['_performance'] = [
                     'execution_time' => round((microtime(true) - $startTime) * 1000, 2) . 'ms',
-                    'memory_used' => $this->formatBytes(memory_get_usage(true) - $startMemory),
-                    'peak_memory' => $this->formatBytes(memory_get_peak_usage(true)),
+                    'memory_used' => Number::fileSize(memory_get_usage(true) - $startMemory),
+                    'peak_memory' => Number::fileSize(memory_get_peak_usage(true)),
                 ];
             }
 
@@ -245,11 +245,7 @@ trait HasApiDatatable
      */
     private function getConfigValue(string $key, mixed $default = null): mixed
     {
-        if (!isset(self::$configCache[$key])) {
-            self::$configCache[$key] = config("controller-helpers.{$key}", $default);
-        }
-
-        return self::$configCache[$key];
+        return config("controller-helpers.{$key}", $default);
     }
 
     /**
