@@ -69,6 +69,8 @@ class SortFilter
 
         if ($this->hasColumn($builder, $orderColumn)) {
             $builder->orderBy($builder->qualifyColumn($orderColumn), $this->order);
+        } else {
+            $builder->orderBy($builder->qualifyColumn($builder->getModel()->getKeyName()), $this->order);
         }
     }
 
