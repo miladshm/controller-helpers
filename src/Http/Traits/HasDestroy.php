@@ -55,7 +55,7 @@ trait HasDestroy
             return Redirect::back()->with(Lang::get('responder::messages.success_delete'));
         } catch (HttpException|AuthorizationException|ModelNotFoundException $exception) {
             DB::rollBack();
-            return ResponderFacade::setMessage($exception->getMessage())->setHttpCode($exception->getStatusCode())->respondError();
+            throw $exception;
         } catch (\Exception $e) {
             DB::rollBack();
             return ResponderFacade::setMessage($e->getMessage())->respondError();
