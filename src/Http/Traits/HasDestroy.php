@@ -51,8 +51,8 @@ trait HasDestroy
             // Otherwise, return a redirect response.
             DB::commit();
             if (Request::expectsJson())
-                return ResponderFacade::setMessage(Lang::get('responder::messages.success_delete.status'))->respond();
-            return Redirect::back()->with(Lang::get('responder::messages.success_delete'));
+                return ResponderFacade::setMessage($this->getDestroyMessage())->respond();
+            return Redirect::back()->with($this->getDestroyMessage());
         } catch (HttpException|AuthorizationException|ModelNotFoundException $exception) {
             DB::rollBack();
             throw $exception;
@@ -73,5 +73,10 @@ trait HasDestroy
     protected function prepareForDestroy(Model $item): void
     {
 
+    }
+
+    protected function getDestroyMessage(): string
+    {
+        return Lang::get('responder::messages.success_delete.status');
     }
 }

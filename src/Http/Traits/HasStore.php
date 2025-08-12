@@ -96,7 +96,7 @@ trait HasStore
     /**
      * Create the model with optimized query.
      */
-    protected function createModel(array $data): Model
+    protected function createModel(array $data, ): Model
     {
         return $this->model()->query()->create($data);
     }
@@ -128,7 +128,7 @@ trait HasStore
         }
 
         return ResponderFacade::setData($itemData)
-            ->setMessage(Lang::get('responder::messages.success_store.status'))
+            ->setMessage($this->getStoreMessage())
             ->respond();
     }
 
@@ -137,7 +137,7 @@ trait HasStore
      */
     protected function buildRedirectStoreResponse(): RedirectResponse
     {
-        return Redirect::back()->with(Lang::get('responder::messages.success_status'));
+        return Redirect::back()->with($this->getStoreMessage());
     }
 
     /**
@@ -197,5 +197,10 @@ trait HasStore
     protected function prepareForStore(Request &$request): void
     {
         // Override in child classes for custom behavior
+    }
+
+    protected function getStoreMessage(): string
+    {
+        return Lang::get('responder::messages.success_store.status');
     }
 }

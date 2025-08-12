@@ -22,39 +22,104 @@ trait HasUpdate
 {
     use WithModel, WithValidation;
 
+    protected bool $enablePerformanceMetrics = true;
+
     /**
      * Updates a specific item in the database.
      *
      * @param Request $request The incoming request object.
      * @param int|string $id The unique identifier of the item to be updated.
      * @return RedirectResponse|JsonResponse The response to be sent back to the client.
+     * @throws \Throwable
      */
     public function update(Request $request, int|string $id): RedirectResponse|JsonResponse
     {
+        $startTime = microtime(true);
+        $startMemory = memory_get_usage(true);
+
+
         $item = $this->getItem($id, withFilters: false);
+
         DB::beginTransaction();
+
         try {
             $this->prepareForUpdate($request, $item);
             $data = $this->getValidationData($request);
-            $item->update($data);
+            $this->updateModel($item, $data);
             $this->updateCallback($request, $item);
 
             DB::commit();
-            if ($request->expectsJson()) {
-                if ($this->getApiResource()) {
-                    $resource = get_class($this->getApiResource());
-                    return ResponderFacade::setData((new $resource($item->load($this->relations())))->jsonSerialize())->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
-                }
-                return ResponderFacade::setData($item->load($this->relations())->toArray())->setMessage(Lang::get('responder::messages.success_update.status'))->respond();
+
+            $response = $this->buildUpdateResponse($request, $item);
+
+            // Add performance metrics if enabled
+            if ($this->enablePerformanceMetrics && config('app.debug')) {
+                $this->addPerformanceMetrics($response, $startTime, $startMemory);
             }
-            return Redirect::back()->with(Lang::get('responder::messages.success_update'));
+
+            return $response;
+
         } catch (ValidationException|HttpException|AuthorizationException|ModelNotFoundException $exception) {
             DB::rollBack();
             throw $exception;
         } catch (Exception $exception) {
             DB::rollBack();
-            return ResponderFacade::setMessage($exception->getMessage())->respondError();
+            return ResponderFacade::setExceptionMessage($exception->getMessage())
+                ->setMessage($exception->getMessage())
+                ->respondError();
         }
+    }
+
+    /**
+     * Update the model with optimized query.
+     */
+    protected function updateModel(Model $item, array $data): void
+    {
+        $item->update($data);
+    }
+
+    /**
+     * Build the store response efficiently.
+     */
+    protected function buildUpdateResponse(Request $request, Model $item): RedirectResponse|JsonResponse
+    {
+        if ($request->expectsJson()) {
+            return $this->buildJsonUpdateResponse($item);
+        }
+
+        return $this->buildRedirectUpdateResponse();
+    }
+
+    /**
+     * Build JSON response for API requests.
+     */
+    protected function buildJsonUpdateResponse(Model $item): JsonResponse
+    {
+        $relations = $this->getRelations();
+
+        if ($this->getApiResource()) {
+            $resource = get_class($this->getApiResource());
+            $itemData = (new $resource($item->fresh($relations)))->jsonSerialize();
+        } else {
+            $itemData = $item->load($relations)->toArray();
+        }
+
+        return ResponderFacade::setData($itemData)
+            ->setMessage($this->getUpdateMessage())
+            ->respond();
+    }
+
+    /**
+     * Build redirect response for web requests.
+     */
+    protected function buildRedirectUpdateResponse(): RedirectResponse
+    {
+        return Redirect::back()->with($this->getUpdateMessage());
+    }
+
+    protected function getUpdateMessage(): string
+    {
+        return Lang::get('responder::messages.success_update.status');
     }
 
     /**
