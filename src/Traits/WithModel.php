@@ -25,9 +25,9 @@ trait WithModel
      * @return array|Builder|Builder[]|Collection|Model|HigherOrderWhenProxy|HigherOrderWhenProxy[]|null
      *     The retrieved item or null if not found.
      */
-    protected function getItem(int|string $id, bool $withTrashed = false, bool $withFilters = true): Model|Collection|array|Builder|HigherOrderWhenProxy|null
+    protected function getItem(int|string $id, bool $withTrashed = false, bool $withFilters = true, bool $withRelations = true, bool $withCounts = true): Model|Collection|array|Builder|HigherOrderWhenProxy|null
     {
-        return $this->query($withTrashed, $withFilters)
+        return $this->query($withTrashed, $withFilters, $withRelations, $withCounts)
             ->findOrFail($id);
     }
 
@@ -38,7 +38,7 @@ trait WithModel
      * @param bool $withFilters If true, applies filters to the query.
      * @return Builder The query builder for the model.
      */
-    private function query(bool $withTrashed = false, bool $withFilters = true): Builder
+    private function query(bool $withTrashed = false, bool $withFilters = true, bool $withRelations = true, bool $withCounts = true): Builder
     {
         $query = $this->model()->query();
 
@@ -59,16 +59,21 @@ trait WithModel
         }
 
         // Eager load relations efficiently
-        $relations = $this->getRelations();
-        if (!empty($relations)) {
-            $query->with($relations);
+        if ($withRelations) {
+            $relations = $this->getRelations();
+            if (!empty($relations)) {
+                $query->with($relations);
+            }
         }
 
         // Eager load counts efficiently
-        $counts = $this->getCounts();
-        if (!empty($counts)) {
-            $query->withCount($counts);
+        if ($withCounts) {
+            $counts = $this->getCounts();
+            if (!empty($counts)) {
+                $query->withCount($counts);
+            }
         }
+
 
         return $query;
     }

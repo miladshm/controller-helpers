@@ -32,10 +32,10 @@ trait HasDestroy
      *                                  otherwise, it returns a redirect response.
      * @throws \Throwable Throws an exception if the record cannot be deleted.
      */
-    public function destroy($id): JsonResponse|RedirectResponse
+    public function destroy(int|string $id): JsonResponse|RedirectResponse
     {
         // Retrieve the item from the database, even if it is soft-deleted.
-        $item = $this->getItem($id, true);
+        $item = $this->getItem($id, withTrashed: true, withRelations: false, withCounts: false);
 
         DB::beginTransaction();
         try {
