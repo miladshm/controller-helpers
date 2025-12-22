@@ -4,6 +4,7 @@ namespace Miladshm\ControllerHelpers\Libraries\Responder;
 
 use ArrayAccess;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Traits\Conditionable;
@@ -14,7 +15,7 @@ class ResponseBuilder
     private ?string $message = null;
     private ?string $exception_message = null;
     private ?int $http_code = null;
-    private int $code = 0;
+    private ?int $code = null;
     private ArrayAccess|iterable $data;
 
     /**
@@ -74,7 +75,7 @@ class ResponseBuilder
     public function respond(): JsonResponse
     {
         $response = [
-            getConfigNames('response.field_names.code') => $this->http_code ?? 200,
+            getConfigNames('response.field_names.code') => $this->code ?? $this->http_code ?? 200,
             getConfigNames('response.field_names.message') => $this->message ?? Lang::get('responder::messages.success_status.status')
         ];
         if (isset($this->data)) {
@@ -125,7 +126,7 @@ class ResponseBuilder
 
     public function respondError(): JsonResponse
     {
-        $this->message = $this->message ?? (env('APP_DEBUG') ? $this->exception_message : Lang::get('responder::messages.error_status.status'));
+        $this->message = $this->message ?? (Config::get('app.debug', false) ? $this->exception_message : Lang::get('responder::messages.error_status.status'));
         return $this->setMessage($this->message)
             ->setHttpCode($this->http_code ?? 500)
             ->respond();
